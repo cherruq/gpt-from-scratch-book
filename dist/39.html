@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>知识与可解释性 · 从零实现 GPT</title>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/highlight.css">
+<link rel="stylesheet" href="assets/book.css">
+<script src="assets/search-index.js" defer></script>
+<script src="assets/experiment-data.js" defer></script>
+<script src="assets/demos.js" defer></script>
+<script src="assets/book.js" defer></script>
+</head>
+<body data-chapter="39">
+<a class="skip" href="#content">跳到正文</a>
+<header class="top"><div class="top-inner">
+<a class="brand" href="index.html"><span aria-hidden="true">∑</span> 从零实现 GPT</a>
+<div class="toolbar" hidden><button type="button" id="open-search">搜索</button>
+<button type="button" id="theme" aria-label="切换明暗主题">主题</button></div>
+</div></header>
+<dialog id="search"><form method="dialog"><label for="query">搜索全书</label>
+<button aria-label="关闭搜索">关闭</button></form>
+<input id="query" type="search" placeholder="输入章节标题、术语或公式名称">
+<div id="search-results" aria-live="polite"></div></dialog>
+<div class="layout">
+<aside class="library"><details open><summary>全书目录</summary>
+<nav aria-label="全书目录"><section><p>先看到完整目标</p><ol><li><a href="01.html"><span>01</span>GPT 到底是什么</a></li><li><a href="02.html"><span>02</span>计算机中的张量</a></li></ol></section><section><p>GPT 所需数学</p><ol><li><a href="03.html"><span>03</span>向量与向量空间</a></li><li><a href="04.html"><span>04</span>点积、距离与相似度</a></li><li><a href="05.html"><span>05</span>矩阵与线性变换</a></li><li><a href="06.html"><span>06</span>函数与非线性</a></li><li><a href="07.html"><span>07</span>导数与偏导</a></li><li><a href="08.html"><span>08</span>链式法则与矩阵微分</a></li><li><a href="09.html"><span>09</span>概率论与自回归分解</a></li><li><a href="10.html"><span>10</span>Softmax 与信息论</a></li><li><a href="11.html"><span>11</span>优化算法</a></li></ol></section><section><p>神经网络如何学习</p><ol><li><a href="12.html"><span>12</span>单个神经元与线性模型</a></li><li><a href="13.html"><span>13</span>多层感知机</a></li><li><a href="14.html"><span>14</span>反向传播</a></li><li><a href="15.html"><span>15</span>自动微分引擎</a></li><li><a href="16.html"><span>16</span>训练稳定性与泛化</a></li></ol></section><section><p>语言的数值表示</p><ol><li><a href="17.html"><span>17</span>Tokenizer：从字节到可学习的 ID</a></li><li><a href="18.html"><span>18</span>One-hot 与 Embedding</a></li><li><a href="19.html"><span>19</span>从上下文学习语义</a></li><li><a href="20.html"><span>20</span>最小语言模型：从计数到训练</a></li><li><a href="21.html"><span>21</span>位置表示</a></li></ol></section><section><p>Attention 与 Transformer</p><ol><li><a href="22.html"><span>22</span>从加权平均到 Attention</a></li><li><a href="23.html"><span>23</span>Scaled Dot-Product Attention</a></li><li><a href="24.html"><span>24</span>Causal Attention</a></li><li><a href="25.html"><span>25</span>Multi-Head Attention</a></li><li><a href="26.html"><span>26</span>Transformer FFN</a></li><li><a href="27.html"><span>27</span>Transformer Block</a></li><li><a href="28.html"><span>28</span>完整 GPT</a></li></ol></section><section><p>从零训练并运行 GPT</p><ol><li><a href="29.html"><span>29</span>数据管线：从记录到下一项标签</a></li><li><a href="30.html"><span>30</span>用 NumPy 从零训练 GPT</a></li><li><a href="31.html"><span>31</span>文本生成：从 logits 到下一 Token</a></li><li><a href="32.html"><span>32</span>评估与调试</a></li><li><a href="33.html"><span>33</span>PyTorch 重实现与对齐</a></li><li><a href="34.html"><span>34</span>完整训练项目与资源预算</a></li></ol></section><section><p>从教学 GPT 到现代 LLM</p><ol><li><a href="35.html"><span>35</span>推理引擎：Prefill、Decode 与 KV Cache</a></li><li><a href="36.html"><span>36</span>现代架构：旋转、分组与稀疏路由</a></li><li><a href="37.html"><span>37</span>训练与推理效率</a></li><li><a href="38.html"><span>38</span>后训练与推理模型</a></li><li><a href="39.html" aria-current="page"><span>39</span>知识与可解释性</a></li><li><a href="40.html"><span>40</span>综合毕业项目：重建一个 GPT</a></li></ol></section><section><p>附录</p><ol><li><a href="41.html"><span>41</span>附录：符号、公式与代码索引</a></li></ol></section></nav></details></aside>
+<main id="content"><article>
+<header class="chapter-header"><p class="eyebrow">从教学 GPT 到现代 LLM / 第 39 章</p>
+<h1>知识与可解释性</h1></header>
+<details class="mobile-outline"><summary>本章目录</summary><div class="toc">
+<ul>
+<li><a href="#_1">学习目标</a></li>
+<li><a href="#_2">前置知识</a></li>
+<li><a href="#gpt">本章在 GPT 中的位置</a></li>
+<li><a href="#_3">探针与手算</a></li>
+<li><a href="#_4">冻结表示后做三种对照</a><ul>
+<li><a href="#_5">对照结果</a></li>
+</ul>
+</li>
+<li><a href="#_6">对照与消融</a></li>
+<li><a href="#python">Python 实验</a></li>
+<li><a href="#_7">常见错误</a></li>
+<li><a href="#_8">练习</a></li>
+<li><a href="#_9">小结与下一章</a></li>
+</ul>
+</div>
+</details>
+<div class="prose"><h2 id="_1">学习目标</h2>
+<p>区分嵌入与上下文状态、相关性与干预。用自建 GPT 复现探针和消融，并比较随机标签、模型训练与提示模板的影响。</p>
+<h2 id="_2">前置知识</h2>
+<p><a href="18.html">第 18 章</a> 的静态 Token 表、<a href="19.html">第 19 章</a> 的上下文表示、<a href="32.html">第 32 章</a> 的验证、<a href="28.html">第 28 章</a> 的完整模型。</p>
+<h2 id="gpt">本章在 GPT 中的位置</h2>
+<p>参数影响输入表示及各层状态，输出最终形成条件分布。探针读出中间量，消融修改指定计算路径，两者回答不同的问题。</p>
+<h2 id="_3">探针与手算</h2>
+<p>线性探针为每个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mi>C</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[C]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mclose">]</span></span></span></span> 隐状态拟合一个低容量读出。合并 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 个样本为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Z</mi><mo stretchy="false">[</mo><mi>n</mi><mo separator="true">,</mo><mi>C</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">Z[n,C]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="mopen">[</span><span class="mord mathnormal">n</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mclose">]</span></span></span></span>，给标签 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo stretchy="false">[</mo><mi>n</mi><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">y[n,1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mopen">[</span><span class="mord mathnormal">n</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span>，解带二范数正则的平方损失：</p>
+<div class="equation" id="eq-probe"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mover accent="true"><mi>w</mi><mo stretchy="true">^</mo></mover><mo>=</mo><mo stretchy="false">(</mo><msup><mi>Z</mi><mi mathvariant="sans-serif">T</mi></msup><mi>Z</mi><mo>+</mo><mi>λ</mi><mi>I</mi><msup><mo stretchy="false">)</mo><mrow><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>Z</mi><mi mathvariant="sans-serif">T</mi></msup><mi>y</mi><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">\widehat w=(Z^\mathsf T Z+\lambda I)^{-1}Z^\mathsf T y.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6706em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6706em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span><span class="svg-align" style="width:calc(100% - 0.1667em);margin-left:0.1667em;top:-3.4306em;"><span class="pstrut" style="height:3em;"></span><span style="height:0.24em;"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="0.24em" viewBox="0 0 1062 239" preserveAspectRatio="none"><path d="M529 0h5l519 115c5 1 9 5 9 10 0 1-1 2-1 3l-4 22
+c-1 5-5 9-11 9h-2L532 67 19 159h-2c-5 0-9-4-11-9l-5-22c-1-6 2-12 8-13z"/></svg></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.1491em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8991em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathsf mtight">T</span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.1491em;vertical-align:-0.25em;"></span><span class="mord mathnormal">λ</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8991em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathsf mtight">T</span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mord">.</span></span></span></span></span><a href="#eq-probe" aria-label="公式 39.1">(39.1)</a></div>
+
+<p>等式来自令梯度 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><msup><mi>Z</mi><mi mathvariant="sans-serif">T</mi></msup><mo stretchy="false">(</mo><mi>Z</mi><mi>w</mi><mo>−</mo><mi>y</mi><mo stretchy="false">)</mo><mo>+</mo><mn>2</mn><mi>λ</mi><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">2Z^\mathsf T(Zw-y)+2\lambda w=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0991em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathsf mtight">T</span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.02691em;">Zw</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord">2</span><span class="mord mathnormal">λ</span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>。实践用线性求解，不显式算逆。若数据与标签都是列向量 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><msup><mo stretchy="false">]</mo><mi mathvariant="sans-serif">T</mi></msup></mrow><annotation encoding="application/x-tex">[1,-1]^\mathsf T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0991em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mclose"><span class="mclose">]</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathsf mtight">T</span></span></span></span></span></span></span></span></span></span></span>，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\lambda=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">λ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>，则 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>w</mi><mo stretchy="true">^</mo></mover><mo>=</mo><mn>2</mn><mi mathvariant="normal">/</mi><mn>3</mn></mrow><annotation encoding="application/x-tex">\widehat w=2/3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6706em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6706em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span><span class="svg-align" style="width:calc(100% - 0.1667em);margin-left:0.1667em;top:-3.4306em;"><span class="pstrut" style="height:3em;"></span><span style="height:0.24em;"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="0.24em" viewBox="0 0 1062 239" preserveAspectRatio="none"><path d="M529 0h5l519 115c5 1 9 5 9 10 0 1-1 2-1 3l-4 22
+c-1 5-5 9-11 9h-2L532 67 19 159h-2c-5 0-9-4-11-9l-5-22c-1-6 2-12 8-13z"/></svg></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2/3</span></span></span></span>，两个分数分别 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi mathvariant="normal">/</mi><mn>3</mn><mo separator="true">,</mo><mo>−</mo><mn>2</mn><mi mathvariant="normal">/</mi><mn>3</mn></mrow><annotation encoding="application/x-tex">2/3,-2/3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2/3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">−</span><span class="mord">2/3</span></span></span></span>。可读出标签说明训练该探针的设置下信号可分，不证明模型的后续层使用该信息。需要冻结模型、对照未训练特征或随机标签、按独立记录划分，并限制探针容量。<a href="https://arxiv.org/abs/1909.03368">控制任务与探针</a></p>
+<p>本项目在 56 条训练记录上用第二层末位置残差拟合地点二分标签，在 8 条留出组合上得到 7/8。标签按地点集合人为指定，类别平衡，长度短，同一个模板重复。这里仅声称该特定读出可以提取信号。原始测量的探针在同一句式上拟合和评估。下面固定该设置，再逐一改变监督标签、模型权重与提示模板。</p>
+<h2 id="_4">冻结表示后做三种对照</h2>
+<p>地点任务将山间、河边、村口、庭院标为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">+</span><span class="mord">1</span></span></span></span>，其余四个地点标为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">1</span></span></span></span>。原训练文件有 56 条记录，却只有 8 种输入探针的前缀。原因是探针在句末「看见了」取最后一行状态，留出变化的是此后出现的景物词，而地点早已出现在前缀里。同模板测试中的 8 个<strong>探针输入</strong>均在拟合探针时看过。把这些输入视为完全独立的泛化样本，会高估可迁移性。</p>
+<p>将末块的最后一行残差复制出来，在 16 个通道后接一项常数 1。探针训练矩阵 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Z</mi><mo stretchy="false">[</mo><mn>56</mn><mo separator="true">,</mo><mn>17</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">Z[56,17]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="mopen">[</span><span class="mord">56</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">17</span><span class="mclose">]</span></span></span></span> 沿记录轴聚合到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>Z</mi><mi mathvariant="sans-serif">T</mi></msup><mi>Z</mi><mo stretchy="false">[</mo><mn>17</mn><mo separator="true">,</mo><mn>17</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">Z^\mathsf T Z[17,17]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0991em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathsf mtight">T</span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="mopen">[</span><span class="mord">17</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">17</span><span class="mclose">]</span></span></span></span>。岭惩罚为 0.1，并作用于全部系数，包括常数项的系数。拟合完毕后以分数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\ge 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> 判为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">+</span><span class="mord">1</span></span></span></span>。固定这个读出规则、分词表和层，依次做三种对照。</p>
+<ol>
+<li><strong>随机标签控制任务。</strong> 随机化的单位是地点类型。每张表固定四正四负，同地点在拟合和评估中使用该表的一致标签。枚举所有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo fence="true">(</mo><mfrac linethickness="0px"><mn>8</mn><mn>4</mn></mfrac><mo fence="true">)</mo></mrow><mo>=</mo><mn>70</mn></mrow><annotation encoding="application/x-tex">\binom{8}{4}=70</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2451em;vertical-align:-0.35em;"></span><span class="mord"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size1">(</span></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8951em;"><span style="top:-2.355em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">4</span></span></span></span><span style="top:-3.144em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">8</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size1">)</span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">70</span></span></span></span> 种平衡映射，剔除真实映射和它的正负翻转，留下 68 种任意映射。为每种映射独立拟合一个同容量探针。逐记录打乱会使相同输入收到互相冲突的监督，测到的是另一种问题。<a href="https://arxiv.org/abs/1909.03368v1">Hewitt 与 Liang 的控制任务设计</a></li>
+<li><strong>未训练模型。</strong> 复制训练使用的架构、词表和初始种子 42。比较训练 120 步后的模型和从同样初始化直接取表示的模型。两套模型都冻结，并各自在相同训练样本上拟合探针。随机初始化就可能把不同地点映射成可区分的特征。</li>
+<li><strong>新模板。</strong> 额外构造「午后我来到〈地点〉，看见了」和「傍晚我离开〈地点〉，看见了」，每种覆盖原来的八个地点。词表、前缀长度、地点的绝对位置和读取处的末字保持一致。脚本逐条检查完整的测试前缀未出现在原语料，并拒绝未知 Token 或截断。新模板只用于评估，在拟合探针时不参与。</li>
+</ol>
+<h3 id="_5">对照结果</h3>
+<p>表内「任意标签」是同一冻结模型在 68 种平衡映射下正确数的中位数。合计 16 项为两种模板各八项。每个模板均衡，恒猜一类会答对 4 项。</p>
+<table>
+<thead>
+<tr>
+<th>冻结模型</th>
+<th>测试提示</th>
+<th style="text-align: right;">地点标签正确数</th>
+<th style="text-align: right;">任意标签中位数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>训练 120 步</td>
+<td>原模板</td>
+<td style="text-align: right;">7 / 8</td>
+<td style="text-align: right;">6 / 8</td>
+</tr>
+<tr>
+<td>未训练</td>
+<td>原模板</td>
+<td style="text-align: right;">5 / 8</td>
+<td style="text-align: right;">7 / 8</td>
+</tr>
+<tr>
+<td>训练 120 步</td>
+<td>午后我来到…</td>
+<td style="text-align: right;">4 / 8</td>
+<td style="text-align: right;">4 / 8</td>
+</tr>
+<tr>
+<td>未训练</td>
+<td>午后我来到…</td>
+<td style="text-align: right;">5 / 8</td>
+<td style="text-align: right;">6 / 8</td>
+</tr>
+<tr>
+<td>训练 120 步</td>
+<td>傍晚我离开…</td>
+<td style="text-align: right;">4 / 8</td>
+<td style="text-align: right;">4 / 8</td>
+</tr>
+<tr>
+<td>未训练</td>
+<td>傍晚我离开…</td>
+<td style="text-align: right;">4 / 8</td>
+<td style="text-align: right;">4 / 8</td>
+</tr>
+<tr>
+<td>训练 120 步</td>
+<td>新模板合计</td>
+<td style="text-align: right;">8 / 16</td>
+<td style="text-align: right;">8 / 16</td>
+</tr>
+<tr>
+<td>未训练</td>
+<td>新模板合计</td>
+<td style="text-align: right;">9 / 16</td>
+<td style="text-align: right;">10 / 16</td>
+</tr>
+</tbody>
+</table>
+<p>训练后的模型在原模板上比同种子未训练模型多对两项，但同一批表示也能支撑任意分类。在训练后的原模板条件下，68 种任意映射中有 26 种答对 7 项、6 种答对 8 项，合计 32 种达到或超过地点标签的得分。可以据此看出探针本身能记住部分地点映射。把真实标签的 7/8 与新模板的 8/16 对照，就能看出读出依赖提示模板。在这个固定种子的八个地点、两个模板上，训练后的读出没有表现出迁移优势。这些均是小规模描述性比较，互补映射、复用训练样本和共享地点也使 68 个结果不能当作 68 次独立重复。这里测试了读出能否迁移。要研究 GPT 是否在预测中使用这个划分，仍需要干预。</p>
+<h2 id="_6">对照与消融</h2>
+<p>固定提示「今早我走到山间，看见了」，观察候选「春」的下一项概率。换地点后保持后缀文字相同，另对原提示将第一块注意力的输出投影及偏置清零。实测：</p>
+<table>
+<thead>
+<tr>
+<th>输入与模型条件</th>
+<th style="text-align: right;">「春」 概率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>原提示、原模型</td>
+<td style="text-align: right;">0.004619</td>
+</tr>
+<tr>
+<td>地点改为「窗前」</td>
+<td style="text-align: right;">0.004871</td>
+</tr>
+<tr>
+<td>原提示、第一块注意力支路消融</td>
+<td style="text-align: right;">0.005134</td>
+</tr>
+</tbody>
+</table>
+<p>第一层头 0 的末查询对「了」权重约 0.18718。权重只表示读入比例，还要结合 V、输出投影、残差及其他头，权重大小不能单独解释最终预测。消融提供干预证据，但会改变整层输入分布并影响后续所有路径；一次观测不能定位某个事实的存储位置。<a href="https://arxiv.org/abs/1902.10186v3">Attention is not Explanation</a></p>
+<figure class="experiment" data-demo="attribution"><figcaption>检查同一推理的第一层注意力行</figcaption><div class="demo"></div></figure>
+
+<p>静态读法：头 0、末查询的权重大致为 BOS 0.1462、今 0.1298、早 0.0737、我 0.0144、走 0.1098、到 0.0142、山 0.0637、间 0.0911，逗号 0.0075、看 0.0545、见 0.1080、了 0.1872。舍入后合计可能略偏离 1。</p>
+<p>记忆可通过在训练文本中寻找生成片段的匹配来观察。泛化应在新组合、模板或任务规则上检验。能否从表示唯一定位一段知识是开放问题，实验必须明确相关性的范围和哪个张量被替换。</p>
+<h2 id="python">Python 实验</h2>
+<p>M8，先运行 <code>python -m src.numpy_gpt.train fit --config configs/quick.json --checkpoint runs/quick.npz</code>，再运行 <code>python -m examples.modern 39 --checkpoint runs/quick.npz</code>。使用 <code>GPT.forward</code> 的观察回调收集拷贝，最后在内存中的模型上执行消融，原检查点保留。</p>
+<figure class="code-example"><figcaption>examples/modern.py · interpretation</figcaption><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">interpretation</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">load_checkpoint</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">)</span>
+    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">restore_tokenizer</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;tokenizer&quot;</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">observe</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="n">states</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="p">[</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">bos</span><span class="p">,</span> <span class="o">*</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">text</span><span class="p">)]</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">prefix</span><span class="p">[</span><span class="o">-</span><span class="n">model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">context</span><span class="p">:]])</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">track</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">observer</span><span class="o">=</span><span class="n">states</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">array</span><span class="p">,</span> <span class="n">logits</span><span class="p">,</span> <span class="n">states</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">features</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">samples</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+            <span class="n">scene</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="n">line</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;看见了&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">observe</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+            <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;block.1&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">scene</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;山间&quot;</span><span class="p">,</span> <span class="s2">&quot;河边&quot;</span><span class="p">,</span> <span class="s2">&quot;村口&quot;</span><span class="p">,</span> <span class="s2">&quot;庭院&quot;</span><span class="p">}</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">features</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)))),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+
+    <span class="n">train_x</span><span class="p">,</span> <span class="n">train_y</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="s2">&quot;data/train.txt&quot;</span><span class="p">)</span>
+    <span class="n">valid_x</span><span class="p">,</span> <span class="n">valid_y</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="s2">&quot;data/validation.txt&quot;</span><span class="p">)</span>
+    <span class="n">readout</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">train_x</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">train_x</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">train_x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">train_x</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">train_y</span><span class="p">)</span>
+    <span class="n">accuracy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">valid_x</span> <span class="o">@</span> <span class="n">readout</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">valid_y</span><span class="p">))</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">logits</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">observe</span><span class="p">(</span><span class="s2">&quot;今早我走到山间，看见了&quot;</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">alt_logits</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">observe</span><span class="p">(</span><span class="s2">&quot;今早我走到窗前，看见了&quot;</span><span class="p">)</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;春&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">probability</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">logits</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">target</span><span class="p">])</span>
+    <span class="n">baseline_probability</span><span class="p">,</span> <span class="n">alternative_probability</span> <span class="o">=</span> <span class="n">probability</span><span class="p">(</span><span class="n">logits</span><span class="p">),</span> <span class="n">probability</span><span class="p">(</span><span class="n">alt_logits</span><span class="p">)</span>
+    <span class="n">attention</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;block.0.attention&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;out.weight&quot;</span><span class="p">,</span> <span class="s2">&quot;out.bias&quot;</span><span class="p">):</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;block.0.&quot;</span> <span class="o">+</span> <span class="n">term</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">ablated</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">track</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)])</span> <span class="ow">or</span> <span class="s2">&quot;BOS&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;probe_accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy</span><span class="p">,</span> <span class="s2">&quot;probe_validation_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_y</span><span class="p">),</span>
+            <span class="s2">&quot;candidate&quot;</span><span class="p">:</span> <span class="s2">&quot;春&quot;</span><span class="p">,</span> <span class="s2">&quot;original&quot;</span><span class="p">:</span> <span class="n">baseline_probability</span><span class="p">,</span> <span class="s2">&quot;other_context&quot;</span><span class="p">:</span> <span class="n">alternative_probability</span><span class="p">,</span>
+            <span class="s2">&quot;ablation&quot;</span><span class="p">:</span> <span class="n">probability</span><span class="p">(</span><span class="n">ablated</span><span class="p">),</span> <span class="s2">&quot;attention_row&quot;</span><span class="p">:</span> <span class="n">attention</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="s2">&quot;attention_tokens&quot;</span><span class="p">:</span> <span class="n">tokens</span><span class="p">}</span>
+</pre></div>
+</figure>
+
+<p>M8-v3 对照入口自行在临时目录训练同一快速配置，运行后输出每个条件的正确数和任意标签直方图。</p>
+<div class="codehilite"><pre><span></span><code><span class="nv">OPENBLAS_NUM_THREADS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>examples.probe_controls
+</code></pre></div>
+
+<figure class="code-example"><figcaption>examples/probe_controls.py · readout</figcaption><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">scene_features</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">samples</span><span class="p">):</span>
+    <span class="n">encoded</span> <span class="o">=</span> <span class="p">[[</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">bos</span><span class="p">,</span> <span class="o">*</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">prompt</span><span class="p">)]</span> <span class="k">for</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="n">samples</span><span class="o">.</span><span class="n">prompts</span><span class="p">]</span>
+    <span class="n">expected</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ORIGINAL</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">scene</span><span class="o">=</span><span class="n">SCENES</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">expected</span> <span class="o">&gt;</span> <span class="n">model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">context</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">!=</span> <span class="n">expected</span> <span class="ow">or</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">unk</span> <span class="ow">in</span> <span class="n">ids</span> <span class="k">for</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">encoded</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All prompts must fit in context at the same length with known characters&quot;</span><span class="p">)</span>
+    <span class="n">layer</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;block.</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">layers</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">observe</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">layer</span><span class="p">:</span>
+            <span class="n">last_states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+
+    <span class="n">last_states</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">encoded</span><span class="p">),</span> <span class="n">track</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">observer</span><span class="o">=</span><span class="n">observe</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">last_states</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">encoded</span><span class="p">))))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_readout</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="n">gram</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">features</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">gram</span> <span class="o">+</span> <span class="n">PENALTY</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">gram</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">features</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">labels</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">correct_count</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="n">prediction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">features</span> <span class="o">@</span> <span class="n">weights</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">prediction</span> <span class="o">==</span> <span class="n">labels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</figure>
+
+<figure class="code-example"><figcaption>examples/probe_controls.py · control_labels</figcaption><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">balanced_labelings</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;All 4–4 maps except the task itself and its sign reversal.&quot;&quot;&quot;</span>
+    <span class="n">labelings</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">positive</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">SCENES</span><span class="p">)),</span> <span class="nb">len</span><span class="p">(</span><span class="n">SCENES</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">SCENES</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">labels</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">positive</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">TASK_LABELS</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="o">-</span><span class="n">TASK_LABELS</span><span class="p">):</span>
+            <span class="n">labelings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">labelings</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</figure>
+
+<figure class="code-example"><figcaption>examples/probe_controls.py · evaluate_conditions</figcaption><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">evaluate_conditions</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">training</span><span class="p">,</span> <span class="n">evaluation</span><span class="p">):</span>
+    <span class="n">train_x</span> <span class="o">=</span> <span class="n">scene_features</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">training</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">TASK_LABELS</span><span class="p">,</span> <span class="n">balanced_labelings</span><span class="p">()))</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">fit_readout</span><span class="p">(</span><span class="n">train_x</span><span class="p">,</span> <span class="n">labels</span><span class="p">[</span><span class="n">training</span><span class="o">.</span><span class="n">scenes</span><span class="p">])</span>
+
+    <span class="n">results</span><span class="p">,</span> <span class="n">novel_counts</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">samples</span> <span class="ow">in</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">scene_features</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">samples</span><span class="p">)</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">correct_count</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">labels</span><span class="p">[</span><span class="n">samples</span><span class="o">.</span><span class="n">scenes</span><span class="p">])</span>
+        <span class="n">results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">prompts</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;original&quot;</span><span class="p">:</span>
+            <span class="n">novel_counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+    <span class="n">results</span><span class="p">[</span><span class="s2">&quot;new_combined&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">novel_counts</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">prompts</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">samples</span> <span class="ow">in</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;original&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">summarise</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="n">total</span><span class="p">):</span>
+    <span class="n">arbitrary</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">hist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">arbitrary</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">total</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;correct&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="s2">&quot;total&quot;</span><span class="p">:</span> <span class="n">total</span><span class="p">,</span>
+        <span class="s2">&quot;arbitrary_mean_correct&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">arbitrary</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span>
+        <span class="s2">&quot;arbitrary_median_correct&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">arbitrary</span><span class="p">)),</span>
+        <span class="s2">&quot;arbitrary_min_correct&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">arbitrary</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span>
+        <span class="s2">&quot;arbitrary_max_correct&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">arbitrary</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span>
+        <span class="s2">&quot;arbitrary_histogram&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">):</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span> <span class="k">if</span> <span class="n">n</span><span class="p">},</span>
+    <span class="p">}</span>
+</pre></div>
+</figure>
+
+<h2 id="_7">常见错误</h2>
+<ul>
+<li>读取静态嵌入却声称分析了上下文隐藏向量。</li>
+<li>只检查完整记录互异，遗漏读出探针实际读取的前缀完全相同。</li>
+<li>只展示最高注意力位置，忽略值载荷和反事实干预。</li>
+</ul>
+<h2 id="_8">练习</h2>
+<ol>
+<li><strong>基础。</strong> 探针标签包含两类均衡样本，常数预测准确率多少？</li>
+<li><strong>推导。</strong> 写出岭回归目标的梯度并令它为零。</li>
+<li><strong>工程。</strong> 分别消融第 0、1 层注意力，并恢复参数后比较。</li>
+<li><strong>开放探索。</strong> 怎样检验某维状态只传递位置信息？</li>
+</ol>
+<details>
+<summary>参考答案</summary>
+<ol>
+<li>50%。</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><msup><mi>Z</mi><mi mathvariant="sans-serif">T</mi></msup><mo stretchy="false">(</mo><mi>Z</mi><mi>w</mi><mo>−</mo><mi>y</mi><mo stretchy="false">)</mo><mo>+</mo><mn>2</mn><mi>λ</mi><mi>w</mi></mrow><annotation encoding="application/x-tex">2Z^\mathsf T(Zw-y)+2\lambda w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0991em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathsf mtight">T</span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.02691em;">Zw</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord">2</span><span class="mord mathnormal">λ</span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span>，移项得到 <a href="39.html#eq-probe">式 (39.1)</a>。</li>
+<li>各次从同一 checkpoint 重载，保持同样的提示、读取位置与目标，记录完整分布。</li>
+<li>让 Token 与位置独立组合，用位置探针和对照，随后在反事实中固定内容改变位置，观察干预效果。</li>
+</ol>
+</details>
+<h2 id="_9">小结与下一章</h2>
+<p>表征分析需同时说明输入、读出和干预。<a href="40.html">第 40 章</a> 以从空目录实现为最终验收，把数学、代码、实验和报告合起来。</p></div>
+<label class="progress" hidden><input type="checkbox" id="completed"> 标记为已读</label>
+<nav class="neighbors" aria-label="相邻章节"><a href="38.html"><small>上一篇</small>后训练与推理模型</a><a href="40.html"><small>下一篇</small>综合毕业项目：重建一个 GPT</a></nav>
+</article></main>
+<aside class="outline"><nav aria-label="本章目录"><p>本章目录</p><div class="toc">
+<ul>
+<li><a href="#_1">学习目标</a></li>
+<li><a href="#_2">前置知识</a></li>
+<li><a href="#gpt">本章在 GPT 中的位置</a></li>
+<li><a href="#_3">探针与手算</a></li>
+<li><a href="#_4">冻结表示后做三种对照</a><ul>
+<li><a href="#_5">对照结果</a></li>
+</ul>
+</li>
+<li><a href="#_6">对照与消融</a></li>
+<li><a href="#python">Python 实验</a></li>
+<li><a href="#_7">常见错误</a></li>
+<li><a href="#_8">练习</a></li>
+<li><a href="#_9">小结与下一章</a></li>
+</ul>
+</div>
+</nav></aside>
+</div>
+</body></html>

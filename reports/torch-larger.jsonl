@@ -1,0 +1,7 @@
+{"step": 0, "validation_nll": 4.823092937469482, "validation_ppl": 124.34910060706811, "parameters": 825600, "validation_tokens": 1024}
+{"step": 50, "train_batch_nll": 0.5195045471191406, "gradient_norm": 0.7683634161949158}
+{"step": 50, "validation_nll": 0.528267502784729, "validation_ppl": 1.6959914613653642, "parameters": 825600, "validation_tokens": 1024}
+{"step": 100, "train_batch_nll": 0.1305125206708908, "gradient_norm": 0.21461544930934906}
+{"step": 100, "validation_nll": 0.1693153828382492, "validation_ppl": 1.1844936489904476, "parameters": 825600, "validation_tokens": 1024}
+{"step": 150, "train_batch_nll": 0.12004314363002777, "gradient_norm": 0.22296881675720215}
+{"step": 150, "validation_nll": 0.13034414499998093, "validation_ppl": 1.1392203728653307, "parameters": 825600, "validation_tokens": 1024}

@@ -1,0 +1,4 @@
+{
+  "context": 16, "channels": 16, "heads": 4, "hidden": 48, "layers": 2,
+  "batch_size": 4, "steps": 120, "log_every": 30, "lr": 0.005, "seed": 42
+}

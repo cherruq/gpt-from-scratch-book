@@ -1,0 +1,140 @@
+{
+  "initialization_seed": 42,
+  "training_steps": 120,
+  "ridge_penalty": 0.1,
+  "scenes": [
+    "山间",
+    "河边",
+    "村口",
+    "庭院",
+    "街角",
+    "桥头",
+    "海边",
+    "窗前"
+  ],
+  "train_rows": 56,
+  "train_unique_prefixes": 8,
+  "new_templates": [
+    "午后我来到{scene}，看见了",
+    "傍晚我离开{scene}，看见了"
+  ],
+  "arbitrary_labelings": 68,
+  "trained": {
+    "original": {
+      "correct": 7,
+      "total": 8,
+      "arbitrary_mean_correct": 6.323529411764706,
+      "arbitrary_median_correct": 6.0,
+      "arbitrary_min_correct": 4,
+      "arbitrary_max_correct": 8,
+      "arbitrary_histogram": {
+        "4": 2,
+        "5": 12,
+        "6": 22,
+        "7": 26,
+        "8": 6
+      }
+    },
+    "template_1": {
+      "correct": 4,
+      "total": 8,
+      "arbitrary_mean_correct": 4.352941176470588,
+      "arbitrary_median_correct": 4.0,
+      "arbitrary_min_correct": 4,
+      "arbitrary_max_correct": 6,
+      "arbitrary_histogram": {
+        "4": 52,
+        "5": 8,
+        "6": 8
+      }
+    },
+    "template_2": {
+      "correct": 4,
+      "total": 8,
+      "arbitrary_mean_correct": 4.352941176470588,
+      "arbitrary_median_correct": 4.0,
+      "arbitrary_min_correct": 4,
+      "arbitrary_max_correct": 7,
+      "arbitrary_histogram": {
+        "4": 56,
+        "5": 4,
+        "6": 4,
+        "7": 4
+      }
+    },
+    "new_combined": {
+      "correct": 8,
+      "total": 16,
+      "arbitrary_mean_correct": 8.705882352941176,
+      "arbitrary_median_correct": 8.0,
+      "arbitrary_min_correct": 8,
+      "arbitrary_max_correct": 11,
+      "arbitrary_histogram": {
+        "8": 40,
+        "9": 12,
+        "10": 12,
+        "11": 4
+      }
+    }
+  },
+  "untrained": {
+    "original": {
+      "correct": 5,
+      "total": 8,
+      "arbitrary_mean_correct": 6.852941176470588,
+      "arbitrary_median_correct": 7.0,
+      "arbitrary_min_correct": 5,
+      "arbitrary_max_correct": 8,
+      "arbitrary_histogram": {
+        "5": 4,
+        "6": 18,
+        "7": 30,
+        "8": 16
+      }
+    },
+    "template_1": {
+      "correct": 5,
+      "total": 8,
+      "arbitrary_mean_correct": 6.088235294117647,
+      "arbitrary_median_correct": 6.0,
+      "arbitrary_min_correct": 5,
+      "arbitrary_max_correct": 8,
+      "arbitrary_histogram": {
+        "5": 16,
+        "6": 32,
+        "7": 18,
+        "8": 2
+      }
+    },
+    "template_2": {
+      "correct": 4,
+      "total": 8,
+      "arbitrary_mean_correct": 4.4411764705882355,
+      "arbitrary_median_correct": 4.0,
+      "arbitrary_min_correct": 4,
+      "arbitrary_max_correct": 7,
+      "arbitrary_histogram": {
+        "4": 48,
+        "5": 14,
+        "6": 2,
+        "7": 4
+      }
+    },
+    "new_combined": {
+      "correct": 9,
+      "total": 16,
+      "arbitrary_mean_correct": 10.529411764705882,
+      "arbitrary_median_correct": 10.0,
+      "arbitrary_min_correct": 9,
+      "arbitrary_max_correct": 14,
+      "arbitrary_histogram": {
+        "9": 14,
+        "10": 28,
+        "11": 12,
+        "12": 8,
+        "13": 2,
+        "14": 4
+      }
+    }
+  }
+}

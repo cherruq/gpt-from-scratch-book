@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>教材目录 · 从零实现 GPT</title>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/highlight.css">
+<link rel="stylesheet" href="assets/book.css">
+<script src="assets/search-index.js" defer></script>
+<script src="assets/experiment-data.js" defer></script>
+<script src="assets/demos.js" defer></script>
+<script src="assets/book.js" defer></script>
+</head>
+<body data-chapter="">
+<a class="skip" href="#content">跳到正文</a>
+<header class="top"><div class="top-inner">
+<a class="brand" href="index.html"><span aria-hidden="true">∑</span> 从零实现 GPT</a>
+<div class="toolbar" hidden><button type="button" id="open-search">搜索</button>
+<button type="button" id="theme" aria-label="切换明暗主题">主题</button></div>
+</div></header>
+<dialog id="search"><form method="dialog"><label for="query">搜索全书</label>
+<button aria-label="关闭搜索">关闭</button></form>
+<input id="query" type="search" placeholder="输入章节标题、术语或公式名称">
+<div id="search-results" aria-live="polite"></div></dialog>
+<div class="layout">
+<aside class="library"><details open><summary>全书目录</summary>
+<nav aria-label="全书目录"><section><p>先看到完整目标</p><ol><li><a href="01.html"><span>01</span>GPT 到底是什么</a></li><li><a href="02.html"><span>02</span>计算机中的张量</a></li></ol></section><section><p>GPT 所需数学</p><ol><li><a href="03.html"><span>03</span>向量与向量空间</a></li><li><a href="04.html"><span>04</span>点积、距离与相似度</a></li><li><a href="05.html"><span>05</span>矩阵与线性变换</a></li><li><a href="06.html"><span>06</span>函数与非线性</a></li><li><a href="07.html"><span>07</span>导数与偏导</a></li><li><a href="08.html"><span>08</span>链式法则与矩阵微分</a></li><li><a href="09.html"><span>09</span>概率论与自回归分解</a></li><li><a href="10.html"><span>10</span>Softmax 与信息论</a></li><li><a href="11.html"><span>11</span>优化算法</a></li></ol></section><section><p>神经网络如何学习</p><ol><li><a href="12.html"><span>12</span>单个神经元与线性模型</a></li><li><a href="13.html"><span>13</span>多层感知机</a></li><li><a href="14.html"><span>14</span>反向传播</a></li><li><a href="15.html"><span>15</span>自动微分引擎</a></li><li><a href="16.html"><span>16</span>训练稳定性与泛化</a></li></ol></section><section><p>语言的数值表示</p><ol><li><a href="17.html"><span>17</span>Tokenizer：从字节到可学习的 ID</a></li><li><a href="18.html"><span>18</span>One-hot 与 Embedding</a></li><li><a href="19.html"><span>19</span>从上下文学习语义</a></li><li><a href="20.html"><span>20</span>最小语言模型：从计数到训练</a></li><li><a href="21.html"><span>21</span>位置表示</a></li></ol></section><section><p>Attention 与 Transformer</p><ol><li><a href="22.html"><span>22</span>从加权平均到 Attention</a></li><li><a href="23.html"><span>23</span>Scaled Dot-Product Attention</a></li><li><a href="24.html"><span>24</span>Causal Attention</a></li><li><a href="25.html"><span>25</span>Multi-Head Attention</a></li><li><a href="26.html"><span>26</span>Transformer FFN</a></li><li><a href="27.html"><span>27</span>Transformer Block</a></li><li><a href="28.html"><span>28</span>完整 GPT</a></li></ol></section><section><p>从零训练并运行 GPT</p><ol><li><a href="29.html"><span>29</span>数据管线：从记录到下一项标签</a></li><li><a href="30.html"><span>30</span>用 NumPy 从零训练 GPT</a></li><li><a href="31.html"><span>31</span>文本生成：从 logits 到下一 Token</a></li><li><a href="32.html"><span>32</span>评估与调试</a></li><li><a href="33.html"><span>33</span>PyTorch 重实现与对齐</a></li><li><a href="34.html"><span>34</span>完整训练项目与资源预算</a></li></ol></section><section><p>从教学 GPT 到现代 LLM</p><ol><li><a href="35.html"><span>35</span>推理引擎：Prefill、Decode 与 KV Cache</a></li><li><a href="36.html"><span>36</span>现代架构：旋转、分组与稀疏路由</a></li><li><a href="37.html"><span>37</span>训练与推理效率</a></li><li><a href="38.html"><span>38</span>后训练与推理模型</a></li><li><a href="39.html"><span>39</span>知识与可解释性</a></li><li><a href="40.html"><span>40</span>综合毕业项目：重建一个 GPT</a></li></ol></section><section><p>附录</p><ol><li><a href="41.html"><span>41</span>附录：符号、公式与代码索引</a></li></ol></section></nav></details></aside>
+<main id="content"><article>
+<header class="hero"><p class="eyebrow">数学 / 神经网络 / 大语言模型</p>
+<h1>从零实现<br><em>GPT</em></h1>
+<p>面向有编程经验的读者。沿着下一 Token 预测的计算路径，从数组、点积和梯度出发，亲手训练一个解码器语言模型。</p>
+<a class="cta" href="01.html">开始阅读 <span aria-hidden="true">→</span></a></header>
+<div class="index-groups" id="catalog"><section><h2>先看到完整目标</h2><ol><li><a href="01.html"><span>01</span>GPT 到底是什么</a></li><li><a href="02.html"><span>02</span>计算机中的张量</a></li></ol></section><section><h2>GPT 所需数学</h2><ol><li><a href="03.html"><span>03</span>向量与向量空间</a></li><li><a href="04.html"><span>04</span>点积、距离与相似度</a></li><li><a href="05.html"><span>05</span>矩阵与线性变换</a></li><li><a href="06.html"><span>06</span>函数与非线性</a></li><li><a href="07.html"><span>07</span>导数与偏导</a></li><li><a href="08.html"><span>08</span>链式法则与矩阵微分</a></li><li><a href="09.html"><span>09</span>概率论与自回归分解</a></li><li><a href="10.html"><span>10</span>Softmax 与信息论</a></li><li><a href="11.html"><span>11</span>优化算法</a></li></ol></section><section><h2>神经网络如何学习</h2><ol><li><a href="12.html"><span>12</span>单个神经元与线性模型</a></li><li><a href="13.html"><span>13</span>多层感知机</a></li><li><a href="14.html"><span>14</span>反向传播</a></li><li><a href="15.html"><span>15</span>自动微分引擎</a></li><li><a href="16.html"><span>16</span>训练稳定性与泛化</a></li></ol></section><section><h2>语言的数值表示</h2><ol><li><a href="17.html"><span>17</span>Tokenizer：从字节到可学习的 ID</a></li><li><a href="18.html"><span>18</span>One-hot 与 Embedding</a></li><li><a href="19.html"><span>19</span>从上下文学习语义</a></li><li><a href="20.html"><span>20</span>最小语言模型：从计数到训练</a></li><li><a href="21.html"><span>21</span>位置表示</a></li></ol></section><section><h2>Attention 与 Transformer</h2><ol><li><a href="22.html"><span>22</span>从加权平均到 Attention</a></li><li><a href="23.html"><span>23</span>Scaled Dot-Product Attention</a></li><li><a href="24.html"><span>24</span>Causal Attention</a></li><li><a href="25.html"><span>25</span>Multi-Head Attention</a></li><li><a href="26.html"><span>26</span>Transformer FFN</a></li><li><a href="27.html"><span>27</span>Transformer Block</a></li><li><a href="28.html"><span>28</span>完整 GPT</a></li></ol></section><section><h2>从零训练并运行 GPT</h2><ol><li><a href="29.html"><span>29</span>数据管线：从记录到下一项标签</a></li><li><a href="30.html"><span>30</span>用 NumPy 从零训练 GPT</a></li><li><a href="31.html"><span>31</span>文本生成：从 logits 到下一 Token</a></li><li><a href="32.html"><span>32</span>评估与调试</a></li><li><a href="33.html"><span>33</span>PyTorch 重实现与对齐</a></li><li><a href="34.html"><span>34</span>完整训练项目与资源预算</a></li></ol></section><section><h2>从教学 GPT 到现代 LLM</h2><ol><li><a href="35.html"><span>35</span>推理引擎：Prefill、Decode 与 KV Cache</a></li><li><a href="36.html"><span>36</span>现代架构：旋转、分组与稀疏路由</a></li><li><a href="37.html"><span>37</span>训练与推理效率</a></li><li><a href="38.html"><span>38</span>后训练与推理模型</a></li><li><a href="39.html"><span>39</span>知识与可解释性</a></li><li><a href="40.html"><span>40</span>综合毕业项目：重建一个 GPT</a></li></ol></section><section><h2>附录</h2><ol><li><a href="41.html"><span>41</span>附录：符号、公式与代码索引</a></li></ol></section></div>
+</article></main>
+<aside class="outline"></aside>
+</div>
+</body></html>

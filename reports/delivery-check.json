@@ -1,0 +1,14 @@
+{
+  "packaged_site_matches_clean_build": true,
+  "site_files": 136,
+  "html_pages": 42,
+  "tested_on_extracted_copy": true,
+  "pytest_passed": 109,
+  "replayed_entries": 100,
+  "browser": {
+    "desktopWidgets": 15,
+    "checkedExperimentTables": 14,
+    "mobilePages": 42,
+    "chrome": "158.0.8127.88"
+  }
+}

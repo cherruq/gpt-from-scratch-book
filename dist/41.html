@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>附录：符号、公式与代码索引 · 从零实现 GPT</title>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/highlight.css">
+<link rel="stylesheet" href="assets/book.css">
+<script src="assets/search-index.js" defer></script>
+<script src="assets/experiment-data.js" defer></script>
+<script src="assets/demos.js" defer></script>
+<script src="assets/book.js" defer></script>
+</head>
+<body data-chapter="41">
+<a class="skip" href="#content">跳到正文</a>
+<header class="top"><div class="top-inner">
+<a class="brand" href="index.html"><span aria-hidden="true">∑</span> 从零实现 GPT</a>
+<div class="toolbar" hidden><button type="button" id="open-search">搜索</button>
+<button type="button" id="theme" aria-label="切换明暗主题">主题</button></div>
+</div></header>
+<dialog id="search"><form method="dialog"><label for="query">搜索全书</label>
+<button aria-label="关闭搜索">关闭</button></form>
+<input id="query" type="search" placeholder="输入章节标题、术语或公式名称">
+<div id="search-results" aria-live="polite"></div></dialog>
+<div class="layout">
+<aside class="library"><details open><summary>全书目录</summary>
+<nav aria-label="全书目录"><section><p>先看到完整目标</p><ol><li><a href="01.html"><span>01</span>GPT 到底是什么</a></li><li><a href="02.html"><span>02</span>计算机中的张量</a></li></ol></section><section><p>GPT 所需数学</p><ol><li><a href="03.html"><span>03</span>向量与向量空间</a></li><li><a href="04.html"><span>04</span>点积、距离与相似度</a></li><li><a href="05.html"><span>05</span>矩阵与线性变换</a></li><li><a href="06.html"><span>06</span>函数与非线性</a></li><li><a href="07.html"><span>07</span>导数与偏导</a></li><li><a href="08.html"><span>08</span>链式法则与矩阵微分</a></li><li><a href="09.html"><span>09</span>概率论与自回归分解</a></li><li><a href="10.html"><span>10</span>Softmax 与信息论</a></li><li><a href="11.html"><span>11</span>优化算法</a></li></ol></section><section><p>神经网络如何学习</p><ol><li><a href="12.html"><span>12</span>单个神经元与线性模型</a></li><li><a href="13.html"><span>13</span>多层感知机</a></li><li><a href="14.html"><span>14</span>反向传播</a></li><li><a href="15.html"><span>15</span>自动微分引擎</a></li><li><a href="16.html"><span>16</span>训练稳定性与泛化</a></li></ol></section><section><p>语言的数值表示</p><ol><li><a href="17.html"><span>17</span>Tokenizer：从字节到可学习的 ID</a></li><li><a href="18.html"><span>18</span>One-hot 与 Embedding</a></li><li><a href="19.html"><span>19</span>从上下文学习语义</a></li><li><a href="20.html"><span>20</span>最小语言模型：从计数到训练</a></li><li><a href="21.html"><span>21</span>位置表示</a></li></ol></section><section><p>Attention 与 Transformer</p><ol><li><a href="22.html"><span>22</span>从加权平均到 Attention</a></li><li><a href="23.html"><span>23</span>Scaled Dot-Product Attention</a></li><li><a href="24.html"><span>24</span>Causal Attention</a></li><li><a href="25.html"><span>25</span>Multi-Head Attention</a></li><li><a href="26.html"><span>26</span>Transformer FFN</a></li><li><a href="27.html"><span>27</span>Transformer Block</a></li><li><a href="28.html"><span>28</span>完整 GPT</a></li></ol></section><section><p>从零训练并运行 GPT</p><ol><li><a href="29.html"><span>29</span>数据管线：从记录到下一项标签</a></li><li><a href="30.html"><span>30</span>用 NumPy 从零训练 GPT</a></li><li><a href="31.html"><span>31</span>文本生成：从 logits 到下一 Token</a></li><li><a href="32.html"><span>32</span>评估与调试</a></li><li><a href="33.html"><span>33</span>PyTorch 重实现与对齐</a></li><li><a href="34.html"><span>34</span>完整训练项目与资源预算</a></li></ol></section><section><p>从教学 GPT 到现代 LLM</p><ol><li><a href="35.html"><span>35</span>推理引擎：Prefill、Decode 与 KV Cache</a></li><li><a href="36.html"><span>36</span>现代架构：旋转、分组与稀疏路由</a></li><li><a href="37.html"><span>37</span>训练与推理效率</a></li><li><a href="38.html"><span>38</span>后训练与推理模型</a></li><li><a href="39.html"><span>39</span>知识与可解释性</a></li><li><a href="40.html"><span>40</span>综合毕业项目：重建一个 GPT</a></li></ol></section><section><p>附录</p><ol><li><a href="41.html" aria-current="page"><span>41</span>附录：符号、公式与代码索引</a></li></ol></section></nav></details></aside>
+<main id="content"><article>
+<header class="chapter-header"><p class="eyebrow">附录 / 第 41 章</p>
+<h1>附录：符号、公式与代码索引</h1></header>
+<details class="mobile-outline"><summary>本章目录</summary><div class="toc">
+<ul>
+<li><a href="#_1">数学符号</a></li>
+<li><a href="#_2">张量形状速查</a></li>
+<li><a href="#_3">梯度速查</a></li>
+<li><a href="#python-numpy-pytorch">Python / NumPy / PyTorch 速查</a></li>
+<li><a href="#_4">术语与索引</a></li>
+<li><a href="#_5">论文阅读路线</a></li>
+<li><a href="#_6">故障排查</a></li>
+<li><a href="#_7">全书源文件与版本入口</a></li>
+</ul>
+</div>
+</details>
+<div class="prose"><h2 id="_1">数学符号</h2>
+<p>本书采用行向量右乘 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mi>W</mi></mrow><annotation encoding="application/x-tex">XW</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mord mathnormal" style="margin-right:0.13889em;">W</span></span></span></span>。若参考文献写列向量 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>W</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><msup><mi>x</mi><mi mathvariant="sans-serif">T</mi></msup></mrow><annotation encoding="application/x-tex">W&#x27; x^\mathsf T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8491em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathsf mtight">T</span></span></span></span></span></span></span></span></span></span></span>，则同一线性映射的参数关系为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>W</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo>=</mo><msup><mi>W</mi><mi mathvariant="sans-serif">T</mi></msup></mrow><annotation encoding="application/x-tex">W&#x27;=W^\mathsf T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7519em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8491em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathsf mtight">T</span></span></span></span></span></span></span></span></span></span></span>。矩阵批维在最前面，最后两轴做乘法，偏置通常沿前缀轴广播。</p>
+<table>
+<thead>
+<tr>
+<th>记号</th>
+<th>含义</th>
+<th>首次展开</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span></span></span></span></td>
+<td>批中序列数</td>
+<td><a href="02.html">张量</a></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo separator="true">,</mo><msub><mi>T</mi><mi>max</mi><mo>⁡</mo></msub></mrow><annotation encoding="application/x-tex">T,T_{\max}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mop mtight"><span class="mtight">m</span><span class="mtight">a</span><span class="mtight">x</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></td>
+<td>当前时间长度和最大上下文</td>
+<td><a href="21.html">位置</a></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span></td>
+<td>词表大小，在注意力上下文也用字母 V 表示值矩阵</td>
+<td><a href="17.html">分词</a>、<a href="22.html">注意力</a></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi></mrow><annotation encoding="application/x-tex">C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span></span></span></span></td>
+<td>残差通道数</td>
+<td><a href="03.html">向量</a></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><mo separator="true">,</mo><msub><mi>H</mi><mrow><mi mathvariant="normal">k</mi><mi mathvariant="normal">v</mi></mrow></msub><mo separator="true">,</mo><mi>D</mi></mrow><annotation encoding="application/x-tex">H,H_{\rm kv},D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.08125em;">H</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.08125em;">H</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0813em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight" style="margin-right:0.01389em;">kv</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span></span></span></span></td>
+<td>查询头数、KV 头数、每头通道 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mi>C</mi><mi mathvariant="normal">/</mi><mi>H</mi></mrow><annotation encoding="application/x-tex">D=C/H</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.08125em;">H</span></span></span></span></td>
+<td><a href="25.html">多头</a>、<a href="36.html">GQA</a></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo separator="true">,</mo><mi>L</mi></mrow><annotation encoding="application/x-tex">F,L</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">L</span></span></span></span></td>
+<td>FFN 隐藏宽度和块数</td>
+<td><a href="26.html">FFN</a>、<a href="28.html">GPT</a></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo separator="true">,</mo><mi>z</mi></mrow><annotation encoding="application/x-tex">x,y,z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span></span></span></span></td>
+<td>输入、目标或结果、归一化前分数，随公式定义</td>
+<td><a href="01.html">总览</a></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo separator="true">,</mo><mi>P</mi></mrow><annotation encoding="application/x-tex">E,P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span></span></span></span></td>
+<td>Token 与位置嵌入表</td>
+<td><a href="18.html">嵌入</a>、<a href="21.html">位置</a></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo separator="true">,</mo><mi>K</mi><mo separator="true">,</mo><mi>V</mi><mo separator="true">;</mo><mi>S</mi><mo separator="true">,</mo><mi>A</mi></mrow><annotation encoding="application/x-tex">Q,K,V; S,A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">Q</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mpunct">;</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">A</span></span></span></span></td>
+<td>查询、键、值；分数与归一化权重</td>
+<td><a href="23.html">注意力</a></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mo separator="true">,</mo><msub><mi>G</mi><mi>x</mi></msub></mrow><annotation encoding="application/x-tex">\bar x,G_x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.5678em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">x</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.2222em;"><span class="mord">ˉ</span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></td>
+<td>标量损失对 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 的梯度，与 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 同形</td>
+<td><a href="08.html">VJP</a></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>⊙</mo><mo separator="true">,</mo><mi mathvariant="normal">∥</mi></mrow><annotation encoding="application/x-tex">\odot,\Vert</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">⊙</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">∥</span></span></span></span></td>
+<td>按元素乘、拼接</td>
+<td><a href="14.html">反向传播</a>、<a href="17.html">分词</a></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi><mo separator="true">,</mo><msub><mi>β</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>β</mi><mn>2</mn></msub><mo separator="true">,</mo><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\eta,\beta_1,\beta_2,\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0528em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0528em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">ϵ</span></span></span></span></td>
+<td>学习率、矩系数、数值稳定项</td>
+<td><a href="11.html">优化</a></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mo separator="true">,</mo><mi>τ</mi></mrow><annotation encoding="application/x-tex">\theta,\tau</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span></span></span></span></td>
+<td>模型参数的集合、采样温度</td>
+<td><a href="30.html">训练</a>、<a href="31.html">生成</a></td>
+</tr>
+</tbody>
+</table>
+<p>书中微型设置 B=2、T=4、V=8、C=4、H=2、D=2、F=16、L=2，使用「春夏秋冬风雨晴雪」及 PCG64 种子 42。手算常取其子例并标明，用少数项写出完整归约。较大实测配置是 C=128、H=4、L=4、T=128，词表按训练集生成；结果见 <a href="34.html">项目章</a>。</p>
+<h2 id="_2">张量形状速查</h2>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>输入或输出</th>
+<th>归约或广播</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Token 及标签</td>
+<td>[B,T] 整数</td>
+<td>标签相对输入右移一个</td>
+</tr>
+<tr>
+<td>嵌入相加</td>
+<td>[B,T,C] + [T,C]</td>
+<td>位置表沿 B 广播</td>
+</tr>
+<tr>
+<td>Norm</td>
+<td>[B,T,C]</td>
+<td>沿 C 求均值或均方，增益与偏置沿 B、T 广播</td>
+</tr>
+<tr>
+<td>线性投影</td>
+<td>[B,T,C] @ [C,M] → [B,T,M]</td>
+<td>沿 C 求和，加 [M]</td>
+</tr>
+<tr>
+<td>拆头</td>
+<td>[B,T,C] → [B,T,H,D] → [B,H,T,D]</td>
+<td>reshape 后转置</td>
+</tr>
+<tr>
+<td>分数</td>
+<td>[B,H,Tq,D] @ [B,H,D,Tk] → [B,H,Tq,Tk]</td>
+<td>沿 D，mask [Tq,Tk] 广播</td>
+</tr>
+<tr>
+<td>权重</td>
+<td>[B,H,Tq,Tk]</td>
+<td>每个查询在 Tk 上归一化</td>
+</tr>
+<tr>
+<td>上下文值</td>
+<td>[B,H,Tq,Tk] @ [B,H,Tk,D] → [B,H,Tq,D]</td>
+<td>沿 Tk 求和</td>
+</tr>
+<tr>
+<td>合头与 FFN</td>
+<td>[B,H,T,D] → [B,T,C] → [B,T,F] → [B,T,C]</td>
+<td>前者逆置换，后者逐位置</td>
+</tr>
+<tr>
+<td>LM Head</td>
+<td>[B,T,C] @ [C,V] → [B,T,V]</td>
+<td>沿 C 求和</td>
+</tr>
+<tr>
+<td>损失</td>
+<td>[B,T,V] 与 [B,T] → 标量</td>
+<td>词表归一化，批与时间取有效均值</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_3">梯度速查</h2>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>反向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>X</mi><mi>W</mi><mo>+</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">Y=XW+b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">Y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span></span></span></span></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mi>X</mi></msub><mo>=</mo><msub><mi>G</mi><mi>Y</mi></msub><msup><mi>W</mi><mi mathvariant="sans-serif">T</mi></msup><mo separator="true">,</mo><mtext> </mtext><msub><mi>G</mi><mi>W</mi></msub><mo>=</mo><msup><mi>X</mi><mi mathvariant="sans-serif">T</mi></msup><msub><mi>G</mi><mi>Y</mi></msub><mo separator="true">,</mo><mtext> </mtext><msub><mi>G</mi><mi>b</mi></msub><mo>=</mo><msub><mo>∑</mo><mi>i</mi></msub><msub><mi>G</mi><mrow><mi>Y</mi><mo separator="true">,</mo><mi>i</mi><mo separator="true">,</mo><mo>:</mo></mrow></msub></mrow><annotation encoding="application/x-tex">G_X=G_YW^\mathsf T,\ G_W=X^\mathsf T G_Y,\ G_b=\sum_i G_{Y,i,:}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">X</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0435em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.22222em;">Y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathsf mtight">T</span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">W</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0435em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathsf mtight">T</span></span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.22222em;">Y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">b</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0497em;vertical-align:-0.2997em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.162em;"><span style="top:-2.4003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2997em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.22222em;">Y</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mrel mtight">:</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mo>=</mo><mi mathvariant="normal">mean</mi><mo>⁡</mo><mo stretchy="false">(</mo><msup><mi>u</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">L=\operatorname{mean}(u^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mop"><span class="mord mathrm">mean</span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></td>
+<td>逐项 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>u</mi><mi mathvariant="normal">/</mi><mi>N</mi></mrow><annotation encoding="application/x-tex">2u/N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mord mathnormal">u</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span></td>
+</tr>
+<tr>
+<td>gather</td>
+<td>scatter-add，重复行沿命中位置相加</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mi mathvariant="normal">softmax</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>z</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p=\operatorname{softmax}(z)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop"><span class="mord mathrm">softmax</span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mclose">)</span></span></span></span></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mi>z</mi></msub><mo>=</mo><mi>p</mi><mo>⊙</mo><mo stretchy="false">(</mo><msub><mi>G</mi><mi>p</mi></msub><mo>−</mo><msub><mo>∑</mo><mi>j</mi></msub><msub><mi>G</mi><mrow><mi>p</mi><mo separator="true">,</mo><mi>j</mi></mrow></msub><msub><mi>p</mi><mi>j</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">G_z=p\odot(G_p-\sum_j G_{p,j}p_j)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.04398em;">z</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⊙</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.1858em;vertical-align:-0.4358em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.162em;"><span style="top:-2.4003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4358em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>，归约轴与正向相同</td>
+</tr>
+<tr>
+<td>平均交叉熵</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mi>z</mi></msub><mo>=</mo><mo stretchy="false">(</mo><mi>p</mi><mo>−</mo><mi>u</mi><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mi>N</mi></mrow><annotation encoding="application/x-tex">G_z=(p-u)/N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.04398em;">z</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span>，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> 为 one-hot</td>
+</tr>
+<tr>
+<td>LayerNorm</td>
+<td><a href="16.html#eq-layernorm-grad">式 (16.1)</a>，包含通道均值梯度</td>
+</tr>
+<tr>
+<td>Attention</td>
+<td><a href="25.html#eq-mha-backward">式 (25.1)</a>，禁止分数梯度为 0</td>
+</tr>
+<tr>
+<td>残差</td>
+<td>直路贡献 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mi>y</mi></msub></mrow><annotation encoding="application/x-tex">G_y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>，再加子层的 VJP</td>
+</tr>
+<tr>
+<td>拼接后按切片输入</td>
+<td>每个输入收到对应输出区间</td>
+</tr>
+</tbody>
+</table>
+<h2 id="python-numpy-pytorch">Python / NumPy / PyTorch 速查</h2>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>NumPy</th>
+<th>PyTorch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>构造数组或张量</td>
+<td><code>np.asarray(data, dtype=np.float64)</code></td>
+<td><code>torch.as_tensor(data, dtype=torch.float64)</code></td>
+</tr>
+<tr>
+<td>堆叠数组</td>
+<td><code>np.stack(sequence, axis=0)</code></td>
+<td><code>torch.stack(sequence, dim=0)</code></td>
+</tr>
+<tr>
+<td>按末轴平均并保形</td>
+<td><code>x.mean(axis=-1, keepdims=True)</code></td>
+<td><code>x.mean(dim=-1, keepdim=True)</code></td>
+</tr>
+<tr>
+<td>交换 Q/K 的矩阵轴</td>
+<td><code>k.swapaxes(-1, -2)</code></td>
+<td><code>k.transpose(-1, -2)</code></td>
+</tr>
+<tr>
+<td>将所有索引加到原表</td>
+<td><code>np.add.at(table, ids, updates)</code></td>
+<td><code>table.index_add_(0, ids, updates)</code></td>
+</tr>
+<tr>
+<td>随机源</td>
+<td><code>np.random.default_rng(42)</code></td>
+<td><code>torch.Generator().manual_seed(42)</code></td>
+</tr>
+<tr>
+<td>比较结果</td>
+<td><code>np.testing.assert_allclose(a,b)</code></td>
+<td><code>torch.testing.assert_close(a,b)</code></td>
+</tr>
+</tbody>
+</table>
+<p>从仓库根目录用 <code>python -m package.module</code> 启动示例，确保模块导入路径一致。函数片段引用同文件中的定义；各章的命令是可直接运行的入口。<a href="https://numpy.org/doc/2.3/">NumPy 2.3 文档</a> · <a href="https://docs.pytorch.org/docs/2.10/">PyTorch 2.10 文档</a></p>
+<h2 id="_4">术语与索引</h2>
+<table>
+<thead>
+<tr>
+<th>查找</th>
+<th>英文</th>
+<th>章节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>广播、步长、布局</td>
+<td>broadcasting, stride, layout</td>
+<td><a href="02.html">2</a></td>
+</tr>
+<tr>
+<td>基、范数、正交</td>
+<td>basis, norm, orthogonality</td>
+<td><a href="03.html">3</a>、<a href="04.html">4</a></td>
+</tr>
+<tr>
+<td>向量–Jacobian 乘积</td>
+<td>vector–Jacobian product (VJP)</td>
+<td><a href="08.html">8</a></td>
+</tr>
+<tr>
+<td>对数和指数、困惑度</td>
+<td>logsumexp, perplexity</td>
+<td><a href="10.html">10</a></td>
+</tr>
+<tr>
+<td>动量、自适应矩估计</td>
+<td>momentum, adaptive moment estimation</td>
+<td><a href="11.html">11</a></td>
+</tr>
+<tr>
+<td>自动微分、计算图</td>
+<td>autodiff, computational graph</td>
+<td><a href="15.html">15</a></td>
+</tr>
+<tr>
+<td>层归一化、随机失活</td>
+<td>layer normalization, dropout</td>
+<td><a href="16.html">16</a></td>
+</tr>
+<tr>
+<td>字节对编码、词表</td>
+<td>BPE, vocabulary</td>
+<td><a href="17.html">17</a></td>
+</tr>
+<tr>
+<td>散射加、参数绑定</td>
+<td>scatter-add, weight tying</td>
+<td><a href="18.html">18</a></td>
+</tr>
+<tr>
+<td>位置表示、旋转</td>
+<td>positional encoding, RoPE</td>
+<td><a href="21.html">21</a>、<a href="36.html">36</a></td>
+</tr>
+<tr>
+<td>因果遮罩</td>
+<td>causal mask</td>
+<td><a href="24.html">24</a></td>
+</tr>
+<tr>
+<td>前馈网络、解码器块</td>
+<td>FFN, decoder block</td>
+<td><a href="26.html">26</a>、<a href="27.html">27</a></td>
+</tr>
+<tr>
+<td>教师强制、检查点</td>
+<td>teacher forcing, checkpoint</td>
+<td><a href="29.html">29</a>、<a href="30.html">30</a></td>
+</tr>
+<tr>
+<td>贪心、核采样</td>
+<td>greedy, nucleus sampling</td>
+<td><a href="31.html">31</a></td>
+</tr>
+<tr>
+<td>预填充、解码、缓存</td>
+<td>prefill, decode, KV cache</td>
+<td><a href="35.html">35</a></td>
+</tr>
+<tr>
+<td>分组查询、混合专家</td>
+<td>GQA, MoE</td>
+<td><a href="36.html">36</a></td>
+</tr>
+<tr>
+<td>在线归约、推测解码</td>
+<td>online reduction, speculative decoding</td>
+<td><a href="37.html">37</a></td>
+</tr>
+<tr>
+<td>偏好优化、强化学习</td>
+<td>preference optimization, reinforcement learning</td>
+<td><a href="38.html">38</a></td>
+</tr>
+<tr>
+<td>探针、消融</td>
+<td>probe, ablation</td>
+<td><a href="39.html">39</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="_5">论文阅读路线</h2>
+<ul>
+<li>从构建块开始，阅读 Transformer 的 §3.2、§3.3、§3.5，手算两行分数，再对照 GPT-2 如何组织解码器。<a href="https://arxiv.org/abs/1706.03762v7">Attention Is All You Need v7</a> · <a href="https://github.com/openai/gpt-2">GPT-2 原始实现</a></li>
+<li>从公式对照优化器的矩状态和解耦衰减，再阅读字节/子词编码的边界及词向量负采样。<a href="https://arxiv.org/abs/1412.6980v9">Adam v9</a> · <a href="https://arxiv.org/abs/1711.05101v3">AdamW v3</a> · <a href="https://arxiv.org/abs/1508.07909v5">子词 BPE v5</a> · <a href="https://arxiv.org/abs/1310.4546v1">负采样</a></li>
+<li>读相对位置旋转与 KV 投影压缩，再检查 FlashAttention 的块统计。<a href="https://arxiv.org/abs/2104.09864v5">RoFormer v5</a> · <a href="https://arxiv.org/abs/2305.13245v3">GQA v3</a> · <a href="https://arxiv.org/abs/2405.04434v5">DeepSeek-V2 v5</a> · <a href="https://arxiv.org/abs/2205.14135v2">FlashAttention v2</a></li>
+<li>从示范监督、偏好对到奖励更新，逐一检查参考策略和旧策略的角色。<a href="https://arxiv.org/abs/2203.02155">InstructGPT</a> · <a href="https://arxiv.org/abs/2305.18290v3">DPO v3</a> · <a href="https://arxiv.org/abs/1707.06347v2">PPO v2</a> · <a href="https://arxiv.org/abs/2402.03300v3">DeepSeekMath v3</a></li>
+</ul>
+<h2 id="_6">故障排查</h2>
+<table>
+<thead>
+<tr>
+<th>症状</th>
+<th>检查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>导入模块失败</td>
+<td>在仓库根目录通过 <code>python -m</code> 运行；确认选中装过 requirements 的解释器</td>
+</tr>
+<tr>
+<td>没有公式</td>
+<td>运行 <code>npm ci</code> 后重新构建；浏览器检查 KaTeX CSS 与字体相对路径</td>
+</tr>
+<tr>
+<td>Python 安装 Torch 失败</td>
+<td>使用有对应 wheel 的 Python 与 CPU 索引；基础 NumPy 实验独立可运行</td>
+</tr>
+<tr>
+<td>logits 非有限</td>
+<td>检查全遮罩行、输入 ID、Norm epsilon 与数据类型</td>
+</tr>
+<tr>
+<td>loss 接近均匀基准</td>
+<td>先确认标签移位、命中和模型参数更新，再做固定 batch 过拟合</td>
+</tr>
+<tr>
+<td>修改未来影响过去</td>
+<td>检查 mask 的查询、键轴和所有跨时间归约</td>
+</tr>
+<tr>
+<td>续训偏离</td>
+<td>比对语料指纹、学习率、批大小、矩状态、步号与 RNG</td>
+</tr>
+<tr>
+<td>KV 正常但长生成发散</td>
+<td>检查位置偏移和达到上限后是否重建窗口</td>
+</tr>
+<tr>
+<td>生成含替换符</td>
+<td>字符模型可能采到 UNK，字节模型可能生成非法 UTF-8</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_7">全书源文件与版本入口</h2>
+<p>每个里程碑有带源码 SHA-256 清单的可解压快照。下载后在解压目录按其中的 README 安装 Python 依赖并运行入口。快照可脱离教材仓库运行。</p>
+<p><a href="downloads/M0-v1.zip">M0-v1</a> · <a href="downloads/M1-v1.zip">M1-v1</a> · <a href="downloads/M2-v1.zip">M2-v1</a> · <a href="downloads/M3-v1.zip">M3-v1</a> · <a href="downloads/M4-v1.zip">M4-v1</a> · <a href="downloads/M5-v1.zip">M5-v1</a> · <a href="downloads/M6-v1.zip">M6-v1</a> · <a href="downloads/M7-v1.zip">M7-v1</a> · <a href="downloads/M8-v1.zip">M8-v1</a></p>
+<p><a href="downloads/M0-v2.zip">M0-v2 导数与矩阵 VJP</a> · <a href="downloads/M2-v2.zip">M2-v2 自动微分</a> · <a href="downloads/M4-v2.zip">M4-v2 注意力与 FFN</a> · <a href="downloads/M5-v2.zip">M5-v2 Transformer 块与权重共享</a> · <a href="downloads/M6-v2.zip">M6-v2 数据与训练</a> · <a href="downloads/M8-v2.zip">M8-v2 完整合集</a> · <a href="downloads/M8-v3.zip">M8-v3 探针对照</a> · <a href="downloads/M8-v4.zip">M8-v4 长上下文与探针对照</a> · <a href="downloads/M8-v5.zip">M8-v5 毕业项目验收</a></p>
+<p><a href="downloads/M3-v2.zip">M3-v2 UTF-8、BPE 与嵌入梯度</a> · <a href="downloads/M3-v3.zip">M3-v3 共现、bigram 与位置表示</a></p>
+<p><a href="downloads/M0-v3.zip">M0-v3 有效目标的损失</a> · <a href="downloads/M2-v3.zip">M2-v3 LayerNorm 梯度验收</a></p>
+<p><a href="downloads/M1-v2.zip">M1-v2 从输出梯度到参数更新</a> · <a href="downloads/M4-v3.zip">M4-v3 查询、键与值的对照</a></p>
+<p><a href="downloads/M7-v2.zip">M7-v2 CPU 混合精度与归约</a> · <a href="downloads/M8-v6.zip">M8-v6 路由、效率与策略目标</a></p>
+<p>基线保留以下里程碑的独立运行入口。每组在现版本测试时持续复跑。数字参数逐章选择例子，源文件段落与 HTML 由构建器保持一致。</p>
+<table>
+<thead>
+<tr>
+<th>里程碑</th>
+<th>章节</th>
+<th>入口及关键源码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M0</td>
+<td><a href="01.html">1</a>–<a href="11.html">11</a></td>
+<td><code>python -m examples.preview</code>；<code>python -m examples.math_basics 2</code>（可换 2–11）</td>
+</tr>
+<tr>
+<td>M1</td>
+<td><a href="12.html">12</a>–<a href="14.html">14</a></td>
+<td><code>python -m examples.networks 13</code>；<code>src/math_basics/mlp.py</code></td>
+</tr>
+<tr>
+<td>M2</td>
+<td><a href="15.html">15</a>–<a href="16.html">16</a></td>
+<td><code>python -m src.autograd.scalar</code>；<code>python -m examples.networks 15</code>；<code>src/autograd/tensor.py</code></td>
+</tr>
+<tr>
+<td>M3</td>
+<td><a href="17.html">17</a>–<a href="21.html">21</a></td>
+<td><code>python -m examples.language 17</code>（可换 17–21）；<code>python -m examples.tokenizer_embedding</code> 复算 <a href="17.html">17</a>–<a href="18.html">18</a>；<code>python -m examples.language_pipeline</code> 复算 <a href="19.html">19</a>–<a href="21.html">21</a>；<code>src/tokenizer/</code>、<code>src/math_basics/language.py</code></td>
+</tr>
+<tr>
+<td>M4</td>
+<td><a href="22.html">22</a>–<a href="26.html">26</a></td>
+<td><code>python -m examples.transformer 23</code>（可换 22–26）；<code>attention_weights</code>、<code>split_heads</code>、<code>gelu</code></td>
+</tr>
+<tr>
+<td>M5</td>
+<td><a href="27.html">27</a>–<a href="28.html">28</a></td>
+<td><code>python -m examples.transformer 28</code>；<code>transformer_block</code> 与 <code>GPT</code></td>
+</tr>
+<tr>
+<td>M6</td>
+<td><a href="29.html">29</a>–<a href="32.html">32</a></td>
+<td><code>python -m src.numpy_gpt.train fit --config configs/quick.json</code>；<code>examples.training</code></td>
+</tr>
+<tr>
+<td>M7</td>
+<td><a href="33.html">33</a>–<a href="34.html">34</a></td>
+<td><code>python -m examples.torch_alignment</code>；<code>python -m src.torch_gpt.train fit --config configs/larger.json --sdpa</code></td>
+</tr>
+<tr>
+<td>M8</td>
+<td><a href="35.html">35</a>–<a href="40.html">40</a></td>
+<td><code>python -m examples.modern 35</code>（可换 35–40）；<code>src/modern/</code> 与基线缓存；39 需按该章训练 NumPy checkpoint</td>
+</tr>
+</tbody>
+</table></div>
+<label class="progress" hidden><input type="checkbox" id="completed"> 标记为已读</label>
+<nav class="neighbors" aria-label="相邻章节"><a href="40.html"><small>上一篇</small>综合毕业项目：重建一个 GPT</a></nav>
+</article></main>
+<aside class="outline"><nav aria-label="本章目录"><p>本章目录</p><div class="toc">
+<ul>
+<li><a href="#_1">数学符号</a></li>
+<li><a href="#_2">张量形状速查</a></li>
+<li><a href="#_3">梯度速查</a></li>
+<li><a href="#python-numpy-pytorch">Python / NumPy / PyTorch 速查</a></li>
+<li><a href="#_4">术语与索引</a></li>
+<li><a href="#_5">论文阅读路线</a></li>
+<li><a href="#_6">故障排查</a></li>
+<li><a href="#_7">全书源文件与版本入口</a></li>
+</ul>
+</div>
+</nav></aside>
+</div>
+</body></html>

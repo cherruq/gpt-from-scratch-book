@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文本生成：从 logits 到下一 Token · 从零实现 GPT</title>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/highlight.css">
+<link rel="stylesheet" href="assets/book.css">
+<script src="assets/search-index.js" defer></script>
+<script src="assets/experiment-data.js" defer></script>
+<script src="assets/demos.js" defer></script>
+<script src="assets/book.js" defer></script>
+</head>
+<body data-chapter="31">
+<a class="skip" href="#content">跳到正文</a>
+<header class="top"><div class="top-inner">
+<a class="brand" href="index.html"><span aria-hidden="true">∑</span> 从零实现 GPT</a>
+<div class="toolbar" hidden><button type="button" id="open-search">搜索</button>
+<button type="button" id="theme" aria-label="切换明暗主题">主题</button></div>
+</div></header>
+<dialog id="search"><form method="dialog"><label for="query">搜索全书</label>
+<button aria-label="关闭搜索">关闭</button></form>
+<input id="query" type="search" placeholder="输入章节标题、术语或公式名称">
+<div id="search-results" aria-live="polite"></div></dialog>
+<div class="layout">
+<aside class="library"><details open><summary>全书目录</summary>
+<nav aria-label="全书目录"><section><p>先看到完整目标</p><ol><li><a href="01.html"><span>01</span>GPT 到底是什么</a></li><li><a href="02.html"><span>02</span>计算机中的张量</a></li></ol></section><section><p>GPT 所需数学</p><ol><li><a href="03.html"><span>03</span>向量与向量空间</a></li><li><a href="04.html"><span>04</span>点积、距离与相似度</a></li><li><a href="05.html"><span>05</span>矩阵与线性变换</a></li><li><a href="06.html"><span>06</span>函数与非线性</a></li><li><a href="07.html"><span>07</span>导数与偏导</a></li><li><a href="08.html"><span>08</span>链式法则与矩阵微分</a></li><li><a href="09.html"><span>09</span>概率论与自回归分解</a></li><li><a href="10.html"><span>10</span>Softmax 与信息论</a></li><li><a href="11.html"><span>11</span>优化算法</a></li></ol></section><section><p>神经网络如何学习</p><ol><li><a href="12.html"><span>12</span>单个神经元与线性模型</a></li><li><a href="13.html"><span>13</span>多层感知机</a></li><li><a href="14.html"><span>14</span>反向传播</a></li><li><a href="15.html"><span>15</span>自动微分引擎</a></li><li><a href="16.html"><span>16</span>训练稳定性与泛化</a></li></ol></section><section><p>语言的数值表示</p><ol><li><a href="17.html"><span>17</span>Tokenizer：从字节到可学习的 ID</a></li><li><a href="18.html"><span>18</span>One-hot 与 Embedding</a></li><li><a href="19.html"><span>19</span>从上下文学习语义</a></li><li><a href="20.html"><span>20</span>最小语言模型：从计数到训练</a></li><li><a href="21.html"><span>21</span>位置表示</a></li></ol></section><section><p>Attention 与 Transformer</p><ol><li><a href="22.html"><span>22</span>从加权平均到 Attention</a></li><li><a href="23.html"><span>23</span>Scaled Dot-Product Attention</a></li><li><a href="24.html"><span>24</span>Causal Attention</a></li><li><a href="25.html"><span>25</span>Multi-Head Attention</a></li><li><a href="26.html"><span>26</span>Transformer FFN</a></li><li><a href="27.html"><span>27</span>Transformer Block</a></li><li><a href="28.html"><span>28</span>完整 GPT</a></li></ol></section><section><p>从零训练并运行 GPT</p><ol><li><a href="29.html"><span>29</span>数据管线：从记录到下一项标签</a></li><li><a href="30.html"><span>30</span>用 NumPy 从零训练 GPT</a></li><li><a href="31.html" aria-current="page"><span>31</span>文本生成：从 logits 到下一 Token</a></li><li><a href="32.html"><span>32</span>评估与调试</a></li><li><a href="33.html"><span>33</span>PyTorch 重实现与对齐</a></li><li><a href="34.html"><span>34</span>完整训练项目与资源预算</a></li></ol></section><section><p>从教学 GPT 到现代 LLM</p><ol><li><a href="35.html"><span>35</span>推理引擎：Prefill、Decode 与 KV Cache</a></li><li><a href="36.html"><span>36</span>现代架构：旋转、分组与稀疏路由</a></li><li><a href="37.html"><span>37</span>训练与推理效率</a></li><li><a href="38.html"><span>38</span>后训练与推理模型</a></li><li><a href="39.html"><span>39</span>知识与可解释性</a></li><li><a href="40.html"><span>40</span>综合毕业项目：重建一个 GPT</a></li></ol></section><section><p>附录</p><ol><li><a href="41.html"><span>41</span>附录：符号、公式与代码索引</a></li></ol></section></nav></details></aside>
+<main id="content"><article>
+<header class="chapter-header"><p class="eyebrow">从零训练并运行 GPT / 第 31 章</p>
+<h1>文本生成：从 logits 到下一 Token</h1></header>
+<details class="mobile-outline"><summary>本章目录</summary><div class="toc">
+<ul>
+<li><a href="#_1">学习目标</a></li>
+<li><a href="#_2">前置知识</a></li>
+<li><a href="#gpt">本章在 GPT 中的位置</a></li>
+<li><a href="#_3">温度与截断</a></li>
+<li><a href="#_4">手算过滤</a></li>
+<li><a href="#python">Python 实验</a><ul>
+<li><a href="#_5">用逐步重算核对生成循环</a></li>
+</ul>
+</li>
+<li><a href="#_6">常见错误</a></li>
+<li><a href="#_7">练习</a></li>
+<li><a href="#_8">小结与下一章</a></li>
+</ul>
+</div>
+</details>
+<div class="prose"><h2 id="_1">学习目标</h2>
+<p>实现 greedy、temperature、top-k、top-p，处理 EOS、种子及上下文截断。</p>
+<h2 id="_2">前置知识</h2>
+<p><a href="10.html">第 10 章</a> 的稳定 Softmax、<a href="30.html">第 30 章</a> 的训练产物。</p>
+<h2 id="gpt">本章在 GPT 中的位置</h2>
+<p>模型输出每个前缀位置的分数。生成程序每次选最后一个位置的分布，然后更新序列，直到 EOS 或达到长度限制。</p>
+<h2 id="_3">温度与截断</h2>
+<p>温度 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>τ</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\tau&gt;0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> 时，将同一行的分数除以温度后归一化，或等价地用原分布 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> 的幂：</p>
+<div class="equation" id="eq-temperature"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msubsup><mi>p</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>τ</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>=</mo><mfrac><msup><mi>e</mi><mrow><mo stretchy="false">(</mo><msub><mi>z</mi><mi>i</mi></msub><mo>−</mo><mi>m</mi><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mi>τ</mi></mrow></msup><mrow><munder><mo>∑</mo><mi>j</mi></munder><msup><mi>e</mi><mrow><mo stretchy="false">(</mo><msub><mi>z</mi><mi>j</mi></msub><mo>−</mo><mi>m</mi><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mi>τ</mi></mrow></msup></mrow></mfrac><mo>=</mo><mfrac><msubsup><mi>p</mi><mi>i</mi><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mi>τ</mi></mrow></msubsup><mrow><munder><mo>∑</mo><mi>j</mi></munder><msubsup><mi>p</mi><mi>j</mi><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mi>τ</mi></mrow></msubsup></mrow></mfrac><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">p_i^{(\tau)}=\frac{e^{(z_i-m)/\tau}}{\sum_j e^{(z_j-m)/\tau}}
+=\frac{p_i^{1/\tau}}{\sum_j p_j^{1/\tau}}.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.3217em;vertical-align:-0.2769em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.0448em;"><span style="top:-2.4231em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.2198em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2769em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.7209em;vertical-align:-1.1559em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.565em;"><span style="top:-2.2799em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.162em;"><span style="top:-2.4003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4358em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8301em;"><span style="top:-3.0051em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">(</span><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3281em;"><span style="top:-2.357em;margin-left:-0.044em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2819em;"><span></span></span></span></span></span></span><span class="mbin mtight">−</span><span class="mord mathnormal mtight">m</span><span class="mclose mtight">)</span><span class="mord mtight">/</span><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.888em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">(</span><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3281em;"><span style="top:-2.357em;margin-left:-0.044em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span><span class="mbin mtight">−</span><span class="mord mathnormal mtight">m</span><span class="mclose mtight">)</span><span class="mord mtight">/</span><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.1559em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.0924em;vertical-align:-1.3706em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.7218em;"><span style="top:-2.11em;"><span class="pstrut" style="height:3.0448em;"></span><span class="mord"><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.162em;"><span style="top:-2.4003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4358em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.0448em;"><span style="top:-2.4231em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span><span style="top:-3.2198em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1/</span><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.413em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.2748em;"><span class="pstrut" style="height:3.0448em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.7218em;"><span class="pstrut" style="height:3.0448em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.0448em;"><span style="top:-2.4231em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.2198em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1/</span><span class="mord mathnormal mtight" style="margin-right:0.1132em;">τ</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2769em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.3706em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mord">.</span></span></span></span></span><a href="#eq-temperature" aria-label="公式 31.1">(31.1)</a></div>
+
+<p>比值变为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>exp</mi><mo>⁡</mo><mo stretchy="false">(</mo><mo stretchy="false">(</mo><msub><mi>z</mi><mi>i</mi></msub><mo>−</mo><msub><mi>z</mi><mi>j</mi></msub><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mi>τ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\exp((z_i-z_j)/\tau)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">exp</span><span class="mopen">((</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span><span class="mclose">)</span></span></span></span>，温度降低放大原有分差。温度为零的 API 特判为 greedy，分数相等取最早 ID。低温会加强模型已经偏好的项，包括错误偏好。top-k 按分数只留前 k。top-p 寻找排序后累积概率首次达到阈值的最短前缀。若同时使用，本书先 top-k，再对保留概率重新归一化做 top-p。最后在保留集合上归一化并用本地 RNG 抽样。</p>
+<p>上下文最大长度由位置表限定。当已有序列超过限制，只截取末尾 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mi>max</mi><mo>⁡</mo></msub></mrow><annotation encoding="application/x-tex">T_{\max}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mop mtight"><span class="mtight">m</span><span class="mtight">a</span><span class="mtight">x</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 项并从位置零重建模型输入；返回完整文本。缓存达到上限后也要重建。把绝对位置表方案当作天然滑动 KV 会重复使用过期于旧上下文的值。EOS 被选中后追加至返回的 ID 序列后停止，解码阶段略去特殊项。</p>
+<h2 id="_4">手算过滤</h2>
+<p>初始概率 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0.5</mn><mo separator="true">,</mo><mn>0.3</mn><mo separator="true">,</mo><mn>0.2</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0.5,0.3,0.2]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0.5</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0.3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0.2</span><span class="mclose">]</span></span></span></span>。top-k=2 保留前两项，归一化为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0.625</mn><mo separator="true">,</mo><mn>0.375</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0.625,0.375,0]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0.625</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0.375</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0</span><span class="mclose">]</span></span></span></span>。top-p=0.75 也选前两项，因为只保留第一项总量 0.5 不够，而两项达到 0.8。温度 0.5 且无截断时，概率平方得到比例 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>25</mn><mo>:</mo><mn>9</mn><mo>:</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">25:9:4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">25</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">:</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">9</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">:</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span>，再分别除以 38。</p>
+<figure class="experiment" data-demo="sampling"><figcaption>拖动 top-p 阈值，观察保留集合</figcaption><div class="demo"></div></figure>
+
+<p>用精确概率读这组交互时，阈值不大于 0.5 只留第一项，阈值大于 0.5 且不大于 0.8 留两项，更高时保留全部。Python 入口从 logits 重新计算浮点概率。若阈值恰在数学累计边界，例如 0.8，舍入后的累计值可能略低于阈值，这时多保留一项。复算示例用 0.75 与 0.85 分别核对边界两侧。</p>
+<h2 id="python">Python 实验</h2>
+<p>M6，运行 <code>python -m examples.training 31</code>。对应 <code>src/numpy_gpt/generate.py::distribution</code> 和 <code>generate</code>。带检查点的生成命令见 <a href="30.html">第 30 章</a>。</p>
+<figure class="code-example"><figcaption>examples/training.py · sample_distribution</figcaption><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">sample_distribution</span><span class="p">():</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">distribution</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="k">for</span> <span class="n">options</span> <span class="ow">in</span>
+            <span class="p">({},</span> <span class="p">{</span><span class="s2">&quot;top_k&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="mf">0.75</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})]</span>
+</pre></div>
+</figure>
+
+<figure class="code-example"><figcaption>src/numpy_gpt/generate.py</figcaption><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Deterministic filtering followed by categorical sampling.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">distribution</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">top_p</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="n">logits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">logits</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">logits</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">logits</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected a finite nonempty logits row&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span> <span class="ow">or</span> <span class="n">temperature</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;</span> <span class="n">top_p</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid temperature or top_p&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">top_k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">top_k</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">top_k</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;top_k must be a positive integer&quot;</span><span class="p">)</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="o">-</span><span class="n">logits</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;stable&quot;</span><span class="p">)</span>
+    <span class="n">probabilities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">temperature</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">probabilities</span><span class="p">[</span><span class="n">order</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">return</span> <span class="n">probabilities</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">order</span><span class="p">[:</span><span class="n">top_k</span><span class="p">]</span>
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">over</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">logits</span><span class="p">[</span><span class="n">order</span><span class="p">]</span> <span class="o">-</span> <span class="n">logits</span><span class="p">[</span><span class="n">order</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="o">/</span> <span class="n">temperature</span><span class="p">)</span>
+    <span class="n">weights</span> <span class="o">/=</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">top_p</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(),</span> <span class="n">top_p</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="p">))</span>
+        <span class="n">order</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">order</span><span class="p">[:</span><span class="n">cut</span><span class="p">],</span> <span class="n">weights</span><span class="p">[:</span><span class="n">cut</span><span class="p">]</span>
+    <span class="n">probabilities</span><span class="p">[</span><span class="n">order</span><span class="p">]</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">probabilities</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">top_p</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">eos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">sequence</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sequence</span> <span class="ow">or</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected nonempty prompt and nonnegative generation length&quot;</span><span class="p">)</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">context</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">use_cache</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">cache</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">context</span><span class="p">:</span>
+                <span class="n">inputs</span> <span class="o">=</span> <span class="n">sequence</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inputs</span><span class="p">,</span> <span class="n">cache</span> <span class="o">=</span> <span class="n">sequence</span><span class="p">[</span><span class="o">-</span><span class="n">context</span><span class="p">:],</span> <span class="kc">None</span>
+            <span class="n">logits</span><span class="p">,</span> <span class="n">cache</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">([</span><span class="n">inputs</span><span class="p">],</span> <span class="n">track</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span> <span class="n">use_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">([</span><span class="n">sequence</span><span class="p">[</span><span class="o">-</span><span class="n">context</span><span class="p">:]],</span> <span class="n">track</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="n">distribution</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">top_k</span><span class="p">,</span> <span class="n">top_p</span><span class="p">)</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">probs</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">probs</span><span class="p">))</span>
+        <span class="n">sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="o">==</span> <span class="n">eos</span><span class="p">:</span>
+            <span class="k">break</span>
+    <span class="k">return</span> <span class="n">sequence</span>
+</pre></div>
+</figure>
+
+<h3 id="_5">用逐步重算核对生成循环</h3>
+<p>可以用模型的前向接口计算每一步应选哪一项，再和生成函数的完整返回序列对照。先复制提示，每次只把 <code>seq[-Tmax:]</code> 送入模型，取 <code>logits[0,-1,:]</code> 中最大值对应的 ID，并按最小 ID 处理并列。选到 EOS 也要先把它追加到返回序列，再结束。</p>
+<p><a href="40.html">第 40 章</a> 验收入口默认训练结果中，提示为 <code>[0,2,6]</code>，窗口上限为 4。禁用 EOS 时，各步的实际窗口与选择如下。</p>
+<table>
+<thead>
+<tr>
+<th>追加步</th>
+<th>送入模型的窗口</th>
+<th style="text-align: right;">选中 ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>[0,2,6]</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td>2</td>
+<td>[0,2,6,4]</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td>3</td>
+<td>[2,6,4,4]</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td>4</td>
+<td>[6,4,4,5]</td>
+<td style="text-align: right;">5</td>
+</tr>
+</tbody>
+</table>
+<p>第三步起，模型输入从左缩短至四项，返回序列继续保留提示和所有追加项。设 EOS 为 4 后，同一提示的返回变成 <code>[0,2,6,4]</code>，原提示列表始终保持三个元素。只有第 1 步有训练任务指定的答案，其余三步用来核对窗口更新。</p>
+<h2 id="_6">常见错误</h2>
+<ul>
+<li>top-p 用严格小于阈值作为保留条件，把第一次跨阈值的必要项删除。</li>
+<li>筛选后忘记归一化。</li>
+<li>在每个生成步重新设种子，导致重复使用第一个随机数。</li>
+</ul>
+<h2 id="_7">练习</h2>
+<ol>
+<li><strong>基础。</strong> 手算例子中 top-p 为 0.85 时保留哪些项？</li>
+<li><strong>推导。</strong> 温度对两个类别概率比的影响是什么？</li>
+<li><strong>工程。</strong> 写一个通过定制 EOS 在首步终止的测试。</li>
+<li><strong>开放探索。</strong> 如何对比两个采样策略的重复率和任务成功率？</li>
+</ol>
+<details>
+<summary>参考答案</summary>
+<ol>
+<li>三项都留，前两项只有 0.8。</li>
+<li>比值为原比值的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mi>τ</mi></mrow><annotation encoding="application/x-tex">1/\tau</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1/</span><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span></span></span></span> 次幂。</li>
+<li>先在固定 greedy 策略下产生首选 ID，将其作为 EOS，再断言只追加一项。</li>
+<li>固定模型、提示、长度预算与一组采样种子，分别报告重复 n-gram、成功率与置信区间。</li>
+</ol>
+</details>
+<h2 id="_8">小结与下一章</h2>
+<p>生成策略把模型分布变成序列，两者可以独立测试。<a href="32.html">第 32 章</a> 综合检查数值、学习曲线和输出。</p></div>
+<label class="progress" hidden><input type="checkbox" id="completed"> 标记为已读</label>
+<nav class="neighbors" aria-label="相邻章节"><a href="30.html"><small>上一篇</small>用 NumPy 从零训练 GPT</a><a href="32.html"><small>下一篇</small>评估与调试</a></nav>
+</article></main>
+<aside class="outline"><nav aria-label="本章目录"><p>本章目录</p><div class="toc">
+<ul>
+<li><a href="#_1">学习目标</a></li>
+<li><a href="#_2">前置知识</a></li>
+<li><a href="#gpt">本章在 GPT 中的位置</a></li>
+<li><a href="#_3">温度与截断</a></li>
+<li><a href="#_4">手算过滤</a></li>
+<li><a href="#python">Python 实验</a><ul>
+<li><a href="#_5">用逐步重算核对生成循环</a></li>
+</ul>
+</li>
+<li><a href="#_6">常见错误</a></li>
+<li><a href="#_7">练习</a></li>
+<li><a href="#_8">小结与下一章</a></li>
+</ul>
+</div>
+</nav></aside>
+</div>
+</body></html>

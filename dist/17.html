@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tokenizer：从字节到可学习的 ID · 从零实现 GPT</title>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/highlight.css">
+<link rel="stylesheet" href="assets/book.css">
+<script src="assets/search-index.js" defer></script>
+<script src="assets/experiment-data.js" defer></script>
+<script src="assets/demos.js" defer></script>
+<script src="assets/book.js" defer></script>
+</head>
+<body data-chapter="17">
+<a class="skip" href="#content">跳到正文</a>
+<header class="top"><div class="top-inner">
+<a class="brand" href="index.html"><span aria-hidden="true">∑</span> 从零实现 GPT</a>
+<div class="toolbar" hidden><button type="button" id="open-search">搜索</button>
+<button type="button" id="theme" aria-label="切换明暗主题">主题</button></div>
+</div></header>
+<dialog id="search"><form method="dialog"><label for="query">搜索全书</label>
+<button aria-label="关闭搜索">关闭</button></form>
+<input id="query" type="search" placeholder="输入章节标题、术语或公式名称">
+<div id="search-results" aria-live="polite"></div></dialog>
+<div class="layout">
+<aside class="library"><details open><summary>全书目录</summary>
+<nav aria-label="全书目录"><section><p>先看到完整目标</p><ol><li><a href="01.html"><span>01</span>GPT 到底是什么</a></li><li><a href="02.html"><span>02</span>计算机中的张量</a></li></ol></section><section><p>GPT 所需数学</p><ol><li><a href="03.html"><span>03</span>向量与向量空间</a></li><li><a href="04.html"><span>04</span>点积、距离与相似度</a></li><li><a href="05.html"><span>05</span>矩阵与线性变换</a></li><li><a href="06.html"><span>06</span>函数与非线性</a></li><li><a href="07.html"><span>07</span>导数与偏导</a></li><li><a href="08.html"><span>08</span>链式法则与矩阵微分</a></li><li><a href="09.html"><span>09</span>概率论与自回归分解</a></li><li><a href="10.html"><span>10</span>Softmax 与信息论</a></li><li><a href="11.html"><span>11</span>优化算法</a></li></ol></section><section><p>神经网络如何学习</p><ol><li><a href="12.html"><span>12</span>单个神经元与线性模型</a></li><li><a href="13.html"><span>13</span>多层感知机</a></li><li><a href="14.html"><span>14</span>反向传播</a></li><li><a href="15.html"><span>15</span>自动微分引擎</a></li><li><a href="16.html"><span>16</span>训练稳定性与泛化</a></li></ol></section><section><p>语言的数值表示</p><ol><li><a href="17.html" aria-current="page"><span>17</span>Tokenizer：从字节到可学习的 ID</a></li><li><a href="18.html"><span>18</span>One-hot 与 Embedding</a></li><li><a href="19.html"><span>19</span>从上下文学习语义</a></li><li><a href="20.html"><span>20</span>最小语言模型：从计数到训练</a></li><li><a href="21.html"><span>21</span>位置表示</a></li></ol></section><section><p>Attention 与 Transformer</p><ol><li><a href="22.html"><span>22</span>从加权平均到 Attention</a></li><li><a href="23.html"><span>23</span>Scaled Dot-Product Attention</a></li><li><a href="24.html"><span>24</span>Causal Attention</a></li><li><a href="25.html"><span>25</span>Multi-Head Attention</a></li><li><a href="26.html"><span>26</span>Transformer FFN</a></li><li><a href="27.html"><span>27</span>Transformer Block</a></li><li><a href="28.html"><span>28</span>完整 GPT</a></li></ol></section><section><p>从零训练并运行 GPT</p><ol><li><a href="29.html"><span>29</span>数据管线：从记录到下一项标签</a></li><li><a href="30.html"><span>30</span>用 NumPy 从零训练 GPT</a></li><li><a href="31.html"><span>31</span>文本生成：从 logits 到下一 Token</a></li><li><a href="32.html"><span>32</span>评估与调试</a></li><li><a href="33.html"><span>33</span>PyTorch 重实现与对齐</a></li><li><a href="34.html"><span>34</span>完整训练项目与资源预算</a></li></ol></section><section><p>从教学 GPT 到现代 LLM</p><ol><li><a href="35.html"><span>35</span>推理引擎：Prefill、Decode 与 KV Cache</a></li><li><a href="36.html"><span>36</span>现代架构：旋转、分组与稀疏路由</a></li><li><a href="37.html"><span>37</span>训练与推理效率</a></li><li><a href="38.html"><span>38</span>后训练与推理模型</a></li><li><a href="39.html"><span>39</span>知识与可解释性</a></li><li><a href="40.html"><span>40</span>综合毕业项目：重建一个 GPT</a></li></ol></section><section><p>附录</p><ol><li><a href="41.html"><span>41</span>附录：符号、公式与代码索引</a></li></ol></section></nav></details></aside>
+<main id="content"><article>
+<header class="chapter-header"><p class="eyebrow">语言的数值表示 / 第 17 章</p>
+<h1>Tokenizer：从字节到可学习的 ID</h1></header>
+<details class="mobile-outline"><summary>本章目录</summary><div class="toc">
+<ul>
+<li><a href="#_1">学习目标</a></li>
+<li><a href="#_2">前置知识</a></li>
+<li><a href="#gpt">本章在 GPT 中的位置</a></li>
+<li><a href="#token">码点、字节和 Token 的边界</a></li>
+<li><a href="#_3">每轮训练先计数，再替换</a></li>
+<li><a href="#_4">编码按训练顺序执行</a></li>
+<li><a href="#_5">解码保持字节内容</a></li>
+<li><a href="#_6">手算「春春」的切分</a></li>
+<li><a href="#abab">手算 abab</a></li>
+<li><a href="#python">Python 实验</a></li>
+<li><a href="#_7">常见错误</a></li>
+<li><a href="#_8">练习</a></li>
+<li><a href="#_9">小结与下一章</a></li>
+</ul>
+</div>
+</details>
+<div class="prose"><h2 id="_1">学习目标</h2>
+<p>区分可见字符、Unicode 码点、UTF-8 字节和 Token。逐轮计算字节级 BPE 的相邻对计数与合并结果，用保存的顺序编码新文本，并核对边界标记和解码往返。</p>
+<h2 id="_2">前置知识</h2>
+<p><a href="02.html">第 2 章</a> 的整数索引、<a href="09.html">第 9 章</a> 的序列。</p>
+<h2 id="gpt">本章在 GPT 中的位置</h2>
+<p>分词器（tokenizer）确定模型的类别空间。训练目标中的每个整数都代表某个 Token；推理则把生成的整数解码回文本。</p>
+<h2 id="token">码点、字节和 Token 的边界</h2>
+<p>Unicode 为文本分配码点，UTF-8 将每个 Unicode 标量值编码为 1 至 4 个字节。下表按文本 <code>"A春🐍e\u0301"</code> 的码点顺序列出偏移。区间用左闭右开 <code>[起点,终点)</code>，相邻区间的终点和起点相同。</p>
+<table>
+<thead>
+<tr>
+<th>码点</th>
+<th>Unicode 编号</th>
+<th>UTF-8 十六进制</th>
+<th>字节区间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>U+0041</td>
+<td>41</td>
+<td>[0,1)</td>
+</tr>
+<tr>
+<td>春</td>
+<td>U+6625</td>
+<td>E6 98 A5</td>
+<td>[1,4)</td>
+</tr>
+<tr>
+<td>🐍</td>
+<td>U+1F40D</td>
+<td>F0 9F 90 8D</td>
+<td>[4,8)</td>
+</tr>
+<tr>
+<td>e</td>
+<td>U+0065</td>
+<td>65</td>
+<td>[8,9)</td>
+</tr>
+<tr>
+<td>组合重音</td>
+<td>U+0301</td>
+<td>CC 81</td>
+<td>[9,11)</td>
+</tr>
+</tbody>
+</table>
+<p>Python 的 <code>len</code> 得到 5 个码点，编码后的 <code>len</code> 为 11 字节。最后两个码点通常显示成一个字形。预组合的 <code>é</code> 只有一个码点 U+00E9，字节是 C3 A9。本章的分词器保留输入的字节，不主动做 Unicode 规范化。ASCII 对应一个以 0 起始的字节。多字节序列的首字节包含长度前缀，后续字节以二进制 <code>10</code> 起始。<a href="https://www.rfc-editor.org/rfc/rfc3629.html#section-3">UTF-8 编码规则，RFC 3629 §3–4</a></p>
+<p>以「春」为例，U+6625 的有效载荷按 4、6、6 位拆成 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6</mn><mo separator="true">,</mo><mn>24</mn><mo separator="true">,</mo><mn>37</mn></mrow><annotation encoding="application/x-tex">6,24,37</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">6</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">24</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">37</span></span></span></span>。三字节格式用前缀 E0、80、80，加上载荷得到 E6、98、A5，十进制是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>230</mn><mo separator="true">,</mo><mn>152</mn><mo separator="true">,</mo><mn>165</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[230,152,165]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">230</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">152</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">165</span><span class="mclose">]</span></span></span></span>。没有合并时，三个字节分别对应三个 Token。合并后某个 Token 可以只包含码点的部分字节，也可以跨几个码点。Token 的切分依赖训练出的规则，词的边界没有参与本章实现的计算。</p>
+<h2 id="_3">每轮训练先计数，再替换</h2>
+<p>字节对编码（byte pair encoding，BPE）在每轮训练中读取各条记录当前的 ID 序列。令第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span></span></span></span> 条长度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>n</mi><mi>r</mi></msub></mrow><annotation encoding="application/x-tex">n_r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，在每个能向右看一项的位置对当前的相邻对计数。</p>
+<div class="equation" id="eq-pair-count"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>c</mi><mo stretchy="false">(</mo><mi>a</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo><mo>=</mo><munder><mo>∑</mo><mi>r</mi></munder><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>0</mn></mrow><mrow><msub><mi>n</mi><mi>r</mi></msub><mo>−</mo><mn>2</mn></mrow></munderover><mn mathvariant="bold">1</mn><mo fence="true" stretchy="true" minsize="1.2em" maxsize="1.2em">[</mo><mo stretchy="false">(</mo><msub><mi>x</mi><mrow><mi>r</mi><mo separator="true">,</mo><mi>j</mi></mrow></msub><mo separator="true">,</mo><msub><mi>x</mi><mrow><mi>r</mi><mo separator="true">,</mo><mi>j</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mi>a</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo><mo fence="true" stretchy="true" minsize="1.2em" maxsize="1.2em">]</mo><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">c(a,b)=\sum_r\sum_{j=0}^{n_r-2}\mathbf{1}\bigl[(x_{r,j},x_{r,j+1})=(a,b)\bigr].</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">c</span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">b</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.226em;vertical-align:-1.4138em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.9em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.25em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.8122em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mrel mtight">=</span><span class="mord mtight">0</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span><span style="top:-4.3111em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1645em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span><span class="mbin mtight">−</span><span class="mord mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.4138em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathbf">1</span><span class="mopen"><span class="delimsizing size1">[</span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">b</span><span class="mclose">)</span><span class="mclose"><span class="delimsizing size1">]</span></span><span class="mord">.</span></span></span></span></span><a href="#eq-pair-count" aria-label="公式 17.1">(17.1)</a></div>
+
+<p>指示函数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn mathvariant="bold">1</mn><mo stretchy="false">[</mo><mo>⋅</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">\mathbf{1}[\cdot]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf">1</span><span class="mopen">[</span><span class="mord">⋅</span><span class="mclose">]</span></span></span></span> 在括号内条件成立时为 1，其余为 0。只有零项或一项的记录没有可计数的位置。选择计数最大的对。平局时先比较左 ID，再比较右 ID，取数值较小的一对。新 ID 从 258 顺序分配。随后逐条从左到右扫描，遇到选中对就写一个新 ID 并前进两项，否则抄写当前项并前进一项。用替换后的记录重新计数，直到达到合并上限或没有相邻对。两条独立记录 <code>["a","b"]</code> 都只有一项，因此没有 <code>ab</code> 可以合并，即使预算足够。</p>
+<table>
+<thead>
+<tr>
+<th>单条记录</th>
+<th>匹配的起点（从 0 计）</th>
+<th style="text-align: right;">aa 计数</th>
+<th style="text-align: right;">实际替换</th>
+<th>完成首轮</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aaa</td>
+<td>0、1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td>[258,97]</td>
+</tr>
+<tr>
+<td>aaaa</td>
+<td>0、1、2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">2</td>
+<td>[258,258]</td>
+</tr>
+</tbody>
+</table>
+<p>例如 <code>aaa</code> 的两个匹配共享中间一项。扫描消耗了位置 0、1 后，位置 2 只剩单个 <code>a</code>。每成功替换一次，序列长度恰好减 1。上表的计数回答有多少个相邻窗口匹配；实际替换数回答序列减少多少项。教学版在每条记录内直接合并。GPT-2 的实现另含正则预切分与字节映射。<a href="https://arxiv.org/abs/1508.07909v5">子词 BPE 原论文</a> · <a href="https://github.com/openai/gpt-2/blob/master/src/encoder.py">GPT-2 encoder.py</a></p>
+<h2 id="_4">编码按训练顺序执行</h2>
+<p>训练记录为 <code>["ab","ab","ba"]</code> 时，<code>ab</code> 有 2 次，<code>ba</code> 有 1 次。首轮保存 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>97</mn><mo separator="true">,</mo><mn>98</mn><mo stretchy="false">)</mo><mo>→</mo><mn>258</mn></mrow><annotation encoding="application/x-tex">(97,98)\to258</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">97</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">98</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">258</span></span></span></span>，次轮保存 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>98</mn><mo separator="true">,</mo><mn>97</mn><mo stretchy="false">)</mo><mo>→</mo><mn>259</mn></mrow><annotation encoding="application/x-tex">(98,97)\to259</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">98</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">97</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">259</span></span></span></span>。拿新文本 <code>baba</code> 检查顺序，初始 ID 是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>98</mn><mo separator="true">,</mo><mn>97</mn><mo separator="true">,</mo><mn>98</mn><mo separator="true">,</mo><mn>97</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[98,97,98,97]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">98</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">97</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">98</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">97</span><span class="mclose">]</span></span></span></span>。此时 <code>ba</code> 既最先出现，又有 2 次，而 <code>ab</code> 只有 1 次。编码仍先应用保存的 <code>ab</code> 规则，得到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>98</mn><mo separator="true">,</mo><mn>258</mn><mo separator="true">,</mo><mn>97</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[98,258,97]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">98</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">258</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">97</span><span class="mclose">]</span></span></span></span>，这一步消除了两个 <code>ba</code> 窗口。如果打乱应用顺序，在保持替换 ID 不变的情况下先把 <code>ba</code> 换成 259，就会得到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>259</mn><mo separator="true">,</mo><mn>259</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[259,259]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">259</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">259</span><span class="mclose">]</span></span></span></span>。两种切分都能展开成原字节，但会改变模型查表的 ID 和序列长度。存档时要同时保留每条规则的左右 ID 和规则次序。</p>
+<h2 id="_5">解码保持字节内容</h2>
+<div class="equation" id="eq-merge-bytes"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi mathvariant="normal">bytes</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo><mo>=</mo><mi mathvariant="normal">bytes</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>a</mi><mo stretchy="false">)</mo><mtext> </mtext><mi mathvariant="normal">∥</mi><mtext> </mtext><mi mathvariant="normal">bytes</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>b</mi><mo stretchy="false">)</mo><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">\operatorname{bytes}(m)=\operatorname{bytes}(a)\,\Vert\,\operatorname{bytes}(b).</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop"><span class="mord mathrm">bytes</span></span><span class="mopen">(</span><span class="mord mathnormal">m</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop"><span class="mord mathrm">bytes</span></span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">∥</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop"><span class="mord mathrm">bytes</span></span><span class="mopen">(</span><span class="mord mathnormal">b</span><span class="mclose">)</span><span class="mord">.</span></span></span></span></span><a href="#eq-merge-bytes" aria-label="公式 17.2">(17.2)</a></div>
+
+<p>符号 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∥</mi></mrow><annotation encoding="application/x-tex">\Vert</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∥</span></span></span></span> 表示拼接，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo separator="true">,</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">a,b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">a</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">b</span></span></span></span> 是已知 ID，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span> 是新 ID。把序列中相邻的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mi>a</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[a,b]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord mathnormal">a</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">b</span><span class="mclose">]</span></span></span></span> 换成 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span>，展开时该段仍是二者拼接，全序列的字节流保持不变。初始序列是 UTF-8 原字节；每次替换都维持这一性质，因此有限次合并后，按 ID 展开再整体解码，能还原输入文本。生成的 ID 也可以展开成非法 UTF-8。默认 <code>strict</code> 会抛出异常，选择 <code>errors="replace"</code> 会让无法解码的片段显示替换符。</p>
+<p>固定保留的 256 是 BOS（beginning of sequence），257 是 EOS（end of sequence）。两项在 <code>encode(..., boundaries=True)</code> 的合并之后插入，都展开为空字节，模型仍各自分配一行嵌入。包含字面文本 <code>EOS</code> 的字符串会像普通文本一样编码。字节词表大小为 256，加上两个边界 ID 和实际学到的合并数，得到模型的词表大小 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span>。</p>
+<h2 id="_6">手算「春春」的切分</h2>
+<p>训练记录只用「春」，编码输入是「春春」。把单条训练记录 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>230</mn><mo separator="true">,</mo><mn>152</mn><mo separator="true">,</mo><mn>165</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[230,152,165]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">230</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">152</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">165</span><span class="mclose">]</span></span></span></span> 划成两个候选对 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>230</mn><mo separator="true">,</mo><mn>152</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(230,152)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">230</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">152</span><span class="mclose">)</span></span></span></span> 与 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>152</mn><mo separator="true">,</mo><mn>165</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(152,165)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">152</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">165</span><span class="mclose">)</span></span></span></span>，都只出现一次。按字典序选 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>152</mn><mo separator="true">,</mo><mn>165</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(152,165)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">152</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">165</span><span class="mclose">)</span></span></span></span>，因为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>152</mn><mo>&lt;</mo><mn>230</mn></mrow><annotation encoding="application/x-tex">152&lt;230</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6835em;vertical-align:-0.0391em;"></span><span class="mord">152</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">230</span></span></span></span>。训练记录变为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>230</mn><mo separator="true">,</mo><mn>258</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[230,258]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">230</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">258</span><span class="mclose">]</span></span></span></span>，只剩一个候选对，第二轮把它合并成 259。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">合并上限</th>
+<th>「春春」的正文 ID</th>
+<th style="text-align: right;">插入 BOS/EOS 后的长度</th>
+<th style="text-align: right;">实际词表大小</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">0</td>
+<td>[230,152,165,230,152,165]</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">258</td>
+</tr>
+<tr>
+<td style="text-align: right;">1</td>
+<td>[230,258,230,258]</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">259</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>[259,259]</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">260</td>
+</tr>
+</tbody>
+</table>
+<p>上限 1 时，第一个 <code>230</code> 占字节 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">[0,1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span>，第一个 <code>258</code> 占 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">[1,3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">3</span><span class="mclose">)</span></span></span></span>。二者单独做严格 UTF-8 解码都会失败。拼成 E6 98 A5 后才得到「春」。上限 2 时正文两个 259 的区间分别为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">[0,3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">3</span><span class="mclose">)</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>3</mn><mo separator="true">,</mo><mn>6</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">[3,6)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">6</span><span class="mclose">)</span></span></span></span>，加上 BOS 和 EOS 得到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>256</mn><mo separator="true">,</mo><mn>259</mn><mo separator="true">,</mo><mn>259</mn><mo separator="true">,</mo><mn>257</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[256,259,259,257]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">256</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">259</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">259</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">257</span><span class="mclose">]</span></span></span></span>。这四个整数直接送入 <a href="18.html">第 18 章</a> 的 Embedding 查表。</p>
+<h2 id="abab">手算 abab</h2>
+<p>ASCII 的 a 为 97、b 为 98。初始 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>97</mn><mo separator="true">,</mo><mn>98</mn><mo separator="true">,</mo><mn>97</mn><mo separator="true">,</mo><mn>98</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[97,98,97,98]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">97</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">98</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">97</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">98</span><span class="mclose">]</span></span></span></span>，ab 有两次，ba 有一次。第一条合并 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>97</mn><mo separator="true">,</mo><mn>98</mn><mo stretchy="false">)</mo><mo>→</mo><mn>258</mn></mrow><annotation encoding="application/x-tex">(97,98)\to258</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">97</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">98</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">258</span></span></span></span>，结果 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>258</mn><mo separator="true">,</mo><mn>258</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[258,258]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">258</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">258</span><span class="mclose">]</span></span></span></span>。第二条 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>258</mn><mo separator="true">,</mo><mn>258</mn><mo stretchy="false">)</mo><mo>→</mo><mn>259</mn></mrow><annotation encoding="application/x-tex">(258,258)\to259</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">258</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">258</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">259</span></span></span></span>，结果 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>259</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[259]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">259</span><span class="mclose">]</span></span></span></span>。解码时 259 展开为两份 258，最终得到 abab。目标词表含字节 256 项、两个特殊项与两条合并，共 260 项。</p>
+<figure class="experiment" data-demo="bpe"><figcaption>查看训练好的两条合并如何编码 abab</figcaption><div class="demo"></div></figure>
+
+<p>静态读法：第 0 步 [97,98,97,98]；第 1 步 [258,258]；第 2 步 [259]。</p>
+<h2 id="python">Python 实验</h2>
+<p>M3，运行 <code>python -m examples.language 17</code>，复用 <code>src/tokenizer/bpe.py::ByteBPE</code>。验证中文、代码缩进、换行和 emoji 往返。预期两条 toy 合并为 (97,98) 和 (258,258)，训练示例词表 280。</p>
+<p>M3-v2 可更换短文本、训练记录和最大合并次数。每个 <code>--train</code> 参数是一条记录。默认训练「春」、编码「春春」并允许两次合并。输出 <code>code_points</code> 和 <code>token_spans</code> 可比对码点与 Token 的偏移。<code>training_trace</code> 与 <code>encoding_trace</code> 分别列出每轮实际规则、匹配数、替换数和结果。复算用整数精确比较。</p>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>examples.tokenizer_embedding
+python<span class="w"> </span>-m<span class="w"> </span>examples.tokenizer_embedding<span class="w"> </span>--train<span class="w"> </span>春<span class="w"> </span>--text<span class="w"> </span>春春<span class="w"> </span>--merges<span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>-m<span class="w"> </span>examples.tokenizer_embedding<span class="w"> </span>--train<span class="w"> </span>aaaa<span class="w"> </span>--text<span class="w"> </span>aaaa<span class="w"> </span>--merges<span class="w"> </span><span class="m">1</span>
+python<span class="w"> </span>-m<span class="w"> </span>examples.tokenizer_embedding<span class="w"> </span>--train<span class="w"> </span>ab<span class="w"> </span>--train<span class="w"> </span>ab<span class="w"> </span>--train<span class="w"> </span>ba<span class="w"> </span>--text<span class="w"> </span><span class="s1">&#39;baba春🐍&#39;</span><span class="w"> </span>--merges<span class="w"> </span><span class="m">2</span>
+</code></pre></div>
+
+<figure class="code-example"><figcaption>examples/tokenizer_embedding.py · utf8_spans</figcaption><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">utf8_spans</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">spans</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">char</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+        <span class="n">spans</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;char&quot;</span><span class="p">:</span> <span class="n">char</span><span class="p">,</span> <span class="s2">&quot;code_point&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;U+</span><span class="si">{</span><span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span><span class="si">:</span><span class="s2">04X</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;byte_span&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">offset</span><span class="p">,</span> <span class="n">end</span><span class="p">],</span> <span class="s2">&quot;hex&quot;</span><span class="p">:</span> <span class="n">raw</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)})</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">end</span>
+    <span class="k">return</span> <span class="n">spans</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">token_spans</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">code_points</span><span class="p">):</span>
+    <span class="n">widths</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">256</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># BOS and EOS carry no text bytes.</span>
+    <span class="k">for</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="ow">in</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">merges</span><span class="p">:</span>
+        <span class="n">widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">+</span> <span class="n">widths</span><span class="p">[</span><span class="n">right</span><span class="p">])</span>
+    <span class="n">raw</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="n">boundaries</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">}</span> <span class="o">|</span> <span class="p">{</span><span class="n">span</span><span class="p">[</span><span class="s2">&quot;byte_span&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">span</span> <span class="ow">in</span> <span class="n">code_points</span><span class="p">}</span>
+    <span class="n">spans</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">widths</span><span class="p">[</span><span class="n">token</span><span class="p">]</span>
+        <span class="n">spans</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">token</span><span class="p">,</span> <span class="s2">&quot;byte_span&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">offset</span><span class="p">,</span> <span class="n">end</span><span class="p">],</span>
+                      <span class="s2">&quot;hex&quot;</span><span class="p">:</span> <span class="n">raw</span><span class="p">[</span><span class="n">offset</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span>
+                      <span class="s2">&quot;aligned_to_code_points&quot;</span><span class="p">:</span> <span class="n">offset</span> <span class="ow">in</span> <span class="n">boundaries</span> <span class="ow">and</span> <span class="n">end</span> <span class="ow">in</span> <span class="n">boundaries</span><span class="p">})</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">end</span>
+    <span class="k">assert</span> <span class="n">offset</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">spans</span>
+</pre></div>
+</figure>
+
+<figure class="code-example"><figcaption>examples/tokenizer_embedding.py · trace_merges</figcaption><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">trace_merges</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">texts</span><span class="p">):</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">]</span>
+    <span class="n">initial</span> <span class="o">=</span> <span class="n">records</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">new_id</span><span class="p">,</span> <span class="n">pair</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">merges</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">first_merge</span><span class="p">):</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">==</span> <span class="n">pair</span> <span class="k">for</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="p">[</span><span class="n">merge_pair</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">pair</span><span class="p">,</span> <span class="n">new_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">records</span><span class="p">]</span>
+        <span class="n">replacements</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">records</span><span class="p">))</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">merged</span><span class="p">))</span>
+        <span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;pair&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">pair</span><span class="p">),</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">new_id</span><span class="p">,</span> <span class="s2">&quot;matches&quot;</span><span class="p">:</span> <span class="n">matches</span><span class="p">,</span>
+                      <span class="s2">&quot;replacements&quot;</span><span class="p">:</span> <span class="n">replacements</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">:</span> <span class="n">merged</span><span class="p">})</span>
+        <span class="n">records</span> <span class="o">=</span> <span class="n">merged</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;initial&quot;</span><span class="p">:</span> <span class="n">initial</span><span class="p">,</span> <span class="s2">&quot;steps&quot;</span><span class="p">:</span> <span class="n">steps</span><span class="p">},</span> <span class="n">records</span>
+</pre></div>
+</figure>
+
+<figure class="code-example"><figcaption>src/tokenizer/bpe.py</figcaption><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;M3. Byte-level BPE over records, with a stable merge order.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
+
+
+<span class="c1"># region merge</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">merge_pair</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">pair</span><span class="p">,</span> <span class="n">replacement</span><span class="p">):</span>
+    <span class="n">merged</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ids</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="n">pair</span><span class="p">:</span>
+            <span class="n">merged</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">replacement</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">merged</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">merged</span>
+<span class="c1"># endregion merge</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ByteBPE</span><span class="p">:</span>
+    <span class="n">merges</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">bos</span> <span class="o">=</span> <span class="mi">256</span>
+    <span class="n">eos</span> <span class="o">=</span> <span class="mi">257</span>
+    <span class="n">first_merge</span> <span class="o">=</span> <span class="mi">258</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">vocab</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_merge</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">merges</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+<span class="c1"># region train_bpe</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">vocab</span><span class="o">=</span><span class="mi">320</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">vocab</span> <span class="o">&lt;</span> <span class="bp">cls</span><span class="o">.</span><span class="n">first_merge</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Vocabulary must leave room for all bytes, BOS and EOS&quot;</span><span class="p">)</span>
+        <span class="n">records</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">]</span>
+        <span class="n">merges</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">replacement</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">first_merge</span><span class="p">,</span> <span class="n">vocab</span><span class="p">):</span>
+            <span class="n">counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">pair</span> <span class="k">for</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">counts</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">pair</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="n">counts</span><span class="p">[</span><span class="n">p</span><span class="p">],</span> <span class="n">p</span><span class="p">))</span>
+            <span class="n">records</span> <span class="o">=</span> <span class="p">[</span><span class="n">merge_pair</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">pair</span><span class="p">,</span> <span class="n">replacement</span><span class="p">)</span> <span class="k">for</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">records</span><span class="p">]</span>
+            <span class="n">merges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">merges</span><span class="p">))</span>
+<span class="c1"># endregion train_bpe</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">boundaries</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">replacement</span><span class="p">,</span> <span class="n">pair</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">merges</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_merge</span><span class="p">):</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="n">merge_pair</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">pair</span><span class="p">,</span> <span class="n">replacement</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">bos</span><span class="p">,</span> <span class="o">*</span><span class="n">ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eos</span><span class="p">]</span> <span class="k">if</span> <span class="n">boundaries</span> <span class="k">else</span> <span class="n">ids</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;strict&quot;</span><span class="p">):</span>
+        <span class="n">vocabulary</span> <span class="o">=</span> <span class="p">[</span><span class="nb">bytes</span><span class="p">([</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">256</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">merges</span><span class="p">:</span>
+            <span class="n">vocabulary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vocabulary</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">+</span> <span class="n">vocabulary</span><span class="p">[</span><span class="n">right</span><span class="p">])</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vocab</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ID outside vocabulary&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">vocabulary</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="n">errors</span><span class="p">)</span>
+</pre></div>
+</figure>
+
+<h2 id="_7">常见错误</h2>
+<ul>
+<li>在测试集拟合合并规则，造成预处理泄漏。</li>
+<li>将普通文本中的「EOS」字符串自动认作特殊标记。</li>
+<li>只保存最后词表并丢失合并顺序，相同文本可能产生不同 ID 序列。</li>
+</ul>
+<h2 id="_8">练习</h2>
+<ol>
+<li><strong>基础。</strong> 未训练任何合并时，中文「春」需要多少 Token？</li>
+<li><strong>推导。</strong> 证明逐步合并不改变解码字节。</li>
+<li><strong>工程。</strong> 换一个含 emoji、制表符和尾部空格的文本，分别测零次与两次合并。逐项对照码点和 Token 区间，并确认解码字符串与输入相等。</li>
+<li><strong>开放探索。</strong> 词表加大对序列长度和 LM Head 计算有什么影响？</li>
+</ol>
+<details>
+<summary>参考答案</summary>
+<ol>
+<li>3，各对应一个 UTF-8 字节。</li>
+<li>每次用字节拼接等价的新 ID 替换相邻两项；一步等价，有限次保持等价。</li>
+<li>在 Bash 中用 <code>sample=$'🐍\tA \r\n'</code>，分别传给 <code>--text "$sample" --train "$sample"</code>，让换行和制表符真正进入参数，并让合并在这段文本中发生。将 <code>--merges</code> 从 0 改到 2，对照 <code>token_spans</code> 的起止偏移与 <code>aligned_to_code_points</code>，比较 <code>decoded</code> 和 <code>text</code> 的完整字符串。</li>
+<li>合并可能减少时间轴，但 LM Head 参数与逐行 Softmax 代价随词表增大。报告每字符平均 Token 数和实际吞吐。</li>
+</ol>
+</details>
+<h2 id="_9">小结与下一章</h2>
+<p>分词器将连续文本变成可逆整数路径。<a href="18.html">第 18 章</a> 讨论模型如何把这些 ID 变成浮点行并学习它们。</p></div>
+<label class="progress" hidden><input type="checkbox" id="completed"> 标记为已读</label>
+<nav class="neighbors" aria-label="相邻章节"><a href="16.html"><small>上一篇</small>训练稳定性与泛化</a><a href="18.html"><small>下一篇</small>One-hot 与 Embedding</a></nav>
+</article></main>
+<aside class="outline"><nav aria-label="本章目录"><p>本章目录</p><div class="toc">
+<ul>
+<li><a href="#_1">学习目标</a></li>
+<li><a href="#_2">前置知识</a></li>
+<li><a href="#gpt">本章在 GPT 中的位置</a></li>
+<li><a href="#token">码点、字节和 Token 的边界</a></li>
+<li><a href="#_3">每轮训练先计数，再替换</a></li>
+<li><a href="#_4">编码按训练顺序执行</a></li>
+<li><a href="#_5">解码保持字节内容</a></li>
+<li><a href="#_6">手算「春春」的切分</a></li>
+<li><a href="#abab">手算 abab</a></li>
+<li><a href="#python">Python 实验</a></li>
+<li><a href="#_7">常见错误</a></li>
+<li><a href="#_8">练习</a></li>
+<li><a href="#_9">小结与下一章</a></li>
+</ul>
+</div>
+</nav></aside>
+</div>
+</body></html>

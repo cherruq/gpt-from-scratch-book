@@ -1,0 +1,7 @@
+{
+  "logits_max_abs": 1.3877787807814457e-17,
+  "loss_abs": 4.440892098500626e-16,
+  "gradient_max_abs": 3.0531133177191805e-16,
+  "gradient_floor": 1e-11,
+  "update_max_abs": 4.982936010018739e-16
+}

@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>综合毕业项目：重建一个 GPT · 从零实现 GPT</title>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/highlight.css">
+<link rel="stylesheet" href="assets/book.css">
+<script src="assets/search-index.js" defer></script>
+<script src="assets/experiment-data.js" defer></script>
+<script src="assets/demos.js" defer></script>
+<script src="assets/book.js" defer></script>
+</head>
+<body data-chapter="40">
+<a class="skip" href="#content">跳到正文</a>
+<header class="top"><div class="top-inner">
+<a class="brand" href="index.html"><span aria-hidden="true">∑</span> 从零实现 GPT</a>
+<div class="toolbar" hidden><button type="button" id="open-search">搜索</button>
+<button type="button" id="theme" aria-label="切换明暗主题">主题</button></div>
+</div></header>
+<dialog id="search"><form method="dialog"><label for="query">搜索全书</label>
+<button aria-label="关闭搜索">关闭</button></form>
+<input id="query" type="search" placeholder="输入章节标题、术语或公式名称">
+<div id="search-results" aria-live="polite"></div></dialog>
+<div class="layout">
+<aside class="library"><details open><summary>全书目录</summary>
+<nav aria-label="全书目录"><section><p>先看到完整目标</p><ol><li><a href="01.html"><span>01</span>GPT 到底是什么</a></li><li><a href="02.html"><span>02</span>计算机中的张量</a></li></ol></section><section><p>GPT 所需数学</p><ol><li><a href="03.html"><span>03</span>向量与向量空间</a></li><li><a href="04.html"><span>04</span>点积、距离与相似度</a></li><li><a href="05.html"><span>05</span>矩阵与线性变换</a></li><li><a href="06.html"><span>06</span>函数与非线性</a></li><li><a href="07.html"><span>07</span>导数与偏导</a></li><li><a href="08.html"><span>08</span>链式法则与矩阵微分</a></li><li><a href="09.html"><span>09</span>概率论与自回归分解</a></li><li><a href="10.html"><span>10</span>Softmax 与信息论</a></li><li><a href="11.html"><span>11</span>优化算法</a></li></ol></section><section><p>神经网络如何学习</p><ol><li><a href="12.html"><span>12</span>单个神经元与线性模型</a></li><li><a href="13.html"><span>13</span>多层感知机</a></li><li><a href="14.html"><span>14</span>反向传播</a></li><li><a href="15.html"><span>15</span>自动微分引擎</a></li><li><a href="16.html"><span>16</span>训练稳定性与泛化</a></li></ol></section><section><p>语言的数值表示</p><ol><li><a href="17.html"><span>17</span>Tokenizer：从字节到可学习的 ID</a></li><li><a href="18.html"><span>18</span>One-hot 与 Embedding</a></li><li><a href="19.html"><span>19</span>从上下文学习语义</a></li><li><a href="20.html"><span>20</span>最小语言模型：从计数到训练</a></li><li><a href="21.html"><span>21</span>位置表示</a></li></ol></section><section><p>Attention 与 Transformer</p><ol><li><a href="22.html"><span>22</span>从加权平均到 Attention</a></li><li><a href="23.html"><span>23</span>Scaled Dot-Product Attention</a></li><li><a href="24.html"><span>24</span>Causal Attention</a></li><li><a href="25.html"><span>25</span>Multi-Head Attention</a></li><li><a href="26.html"><span>26</span>Transformer FFN</a></li><li><a href="27.html"><span>27</span>Transformer Block</a></li><li><a href="28.html"><span>28</span>完整 GPT</a></li></ol></section><section><p>从零训练并运行 GPT</p><ol><li><a href="29.html"><span>29</span>数据管线：从记录到下一项标签</a></li><li><a href="30.html"><span>30</span>用 NumPy 从零训练 GPT</a></li><li><a href="31.html"><span>31</span>文本生成：从 logits 到下一 Token</a></li><li><a href="32.html"><span>32</span>评估与调试</a></li><li><a href="33.html"><span>33</span>PyTorch 重实现与对齐</a></li><li><a href="34.html"><span>34</span>完整训练项目与资源预算</a></li></ol></section><section><p>从教学 GPT 到现代 LLM</p><ol><li><a href="35.html"><span>35</span>推理引擎：Prefill、Decode 与 KV Cache</a></li><li><a href="36.html"><span>36</span>现代架构：旋转、分组与稀疏路由</a></li><li><a href="37.html"><span>37</span>训练与推理效率</a></li><li><a href="38.html"><span>38</span>后训练与推理模型</a></li><li><a href="39.html"><span>39</span>知识与可解释性</a></li><li><a href="40.html" aria-current="page"><span>40</span>综合毕业项目：重建一个 GPT</a></li></ol></section><section><p>附录</p><ol><li><a href="41.html"><span>41</span>附录：符号、公式与代码索引</a></li></ol></section></nav></details></aside>
+<main id="content"><article>
+<header class="chapter-header"><p class="eyebrow">从教学 GPT 到现代 LLM / 第 40 章</p>
+<h1>综合毕业项目：重建一个 GPT</h1></header>
+<details class="mobile-outline"><summary>本章目录</summary><div class="toc">
+<ul>
+<li><a href="#_1">学习目标</a></li>
+<li><a href="#_2">前置知识</a></li>
+<li><a href="#gpt">本章在 GPT 中的位置</a></li>
+<li><a href="#_3">从空目录开始的交付顺序</a></li>
+<li><a href="#_4">最小验收矩阵</a></li>
+<li><a href="#python">Python 实验</a></li>
+<li><a href="#_5">用统一输入验收自己的实现</a></li>
+<li><a href="#_6">常见错误</a></li>
+<li><a href="#_7">练习</a></li>
+<li><a href="#_8">小结与下一章</a></li>
+</ul>
+</div>
+</details>
+<div class="prose"><h2 id="_1">学习目标</h2>
+<p>从空目录搭建可训练、可核验、可复现的 Decoder-only GPT，提交实验日志、推理样例和性能分析。</p>
+<h2 id="_2">前置知识</h2>
+<p><a href="15.html">第 15 章</a> 的自动微分、<a href="17.html">第 17 章</a> 的分词、<a href="28.html">第 28 章</a> 的模型、<a href="30.html">第 30 章</a> 的训练、<a href="32.html">第 32 章</a> 的评估、<a href="35.html">第 35 章</a> 的 KV Cache。</p>
+<h2 id="gpt">本章在 GPT 中的位置</h2>
+<p>项目验收覆盖从文本到概率，再到优化、生成及可重现实证。可先独立实现，再以本仓库为参考对拍。</p>
+<h2 id="_3">从空目录开始的交付顺序</h2>
+<ol>
+<li><strong>约定。</strong> 写下 Python 与依赖版本、数值类型、行向量右乘、词表与固定种子。用原创或许可清楚的语料，保留生成方式、记录边界和分割。</li>
+<li><strong>算子。</strong> 实现 Tensor 的加法、乘法、显式矩阵轴 matmul、归约、reshape、transpose、索引和指数对数。一开始以有限差分与重复索引累加验证。</li>
+<li><strong>模型。</strong> 先单头、再多头、再块。给出每步形状与参数来源。把解码器层接上可学习位置、词嵌入、最终 Norm 与共享输出。</li>
+<li><strong>训练。</strong> 样本用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">T+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 项切成输入与标签。固定批先过拟合，再训练独立划分。保存参数、优化器、Token 映射、批采样随机流，再做续训对照。</li>
+<li><strong>推理。</strong> 实现 greedy、temperature、top-k、top-p、EOS 与窗口上限。先测无缓存，再加 prefill/decode。使用相同 prompt 和种子对照 logits 与序列。</li>
+<li><strong>报告。</strong> 汇总软硬件配置、参数与理论 FLOPs、实际指标和生成输出。分开解释模型的可用范围及明确未验证的配置。</li>
+</ol>
+<h2 id="_4">最小验收矩阵</h2>
+<table>
+<thead>
+<tr>
+<th>产物</th>
+<th>可复核验收</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型与参数表</td>
+<td>微型 GPT 544 参数，输入 [2,4] → logits [2,4,8]</td>
+</tr>
+<tr>
+<td>导数与共享</td>
+<td>至少对 Q/K/V、归一化、重复索引、共享嵌入做测试</td>
+</tr>
+<tr>
+<td>因果性</td>
+<td>修改未来前，前缀 logits 保持一致</td>
+</tr>
+<tr>
+<td>训练稳定</td>
+<td>八项监督的固定批平均 NLL 明显下降；另测独立验证</td>
+</tr>
+<tr>
+<td>CLI 与续训</td>
+<td>连续训练对比分段恢复，参数和 optimizer/RNG 一致</td>
+</tr>
+<tr>
+<td>解码与性能</td>
+<td>缓存与重算 logits 一致，报告缓存字节与估算方法</td>
+</tr>
+<tr>
+<td>复现交付</td>
+<td>README、固定配置、语料许可、脚本、测试报告与解释边界</td>
+</tr>
+</tbody>
+</table>
+<p>在报告里给出误差单位和阈值。可用</p>
+<div class="equation" id="eq-overall-accept"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi mathvariant="normal">Δ</mi><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">t</mi></mrow></msub><mo>=</mo><munder><mrow><mi>max</mi><mo>⁡</mo></mrow><mrow><mi>b</mi><mo separator="true">,</mo><mi>t</mi><mo separator="true">,</mo><mi>v</mi></mrow></munder><mi mathvariant="normal">∣</mi><msubsup><mi>z</mi><mrow><mi>b</mi><mi>t</mi><mi>v</mi></mrow><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">h</mi><mi mathvariant="normal">e</mi></mrow></msubsup><mo>−</mo><msubsup><mi>z</mi><mrow><mi>b</mi><mi>t</mi><mi>v</mi></mrow><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">l</mi></mrow></msubsup><mi mathvariant="normal">∣</mi><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">\Delta_{\rm logit}=\max_{b,t,v}|z_{btv}^{\rm cache}-z_{btv}^{\rm full}|.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord">Δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">logit</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.7873em;vertical-align:-0.8882em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.4306em;"><span style="top:-2.3479em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">t</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">max</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8882em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">∣</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8991em;"><span style="top:-2.453em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span></span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">cache</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.1491em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8991em;"><span style="top:-2.453em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span></span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">full</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mord">∣.</span></span></span></span></span><a href="#eq-overall-accept" aria-label="公式 40.1">(40.1)</a></div>
+
+<p>手算例：若两行输出分别是 [1.00000000001, 0] 与 [1, 0]，最大差约 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>10</mn><mrow><mo>−</mo><mn>11</mn></mrow></msup></mrow><annotation encoding="application/x-tex">10^{-11}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">11</span></span></span></span></span></span></span></span></span></span></span></span>。若设 float64 缓存容差 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>10</mn><mrow><mo>−</mo><mn>12</mn></mrow></msup></mrow><annotation encoding="application/x-tex">10^{-12}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">12</span></span></span></span></span></span></span></span></span></span></span></span>，这一行检查不通过，即使 argmax 一样。形状 [2,4,8] 的稠密 logits 在 float64 下占 512 字节，缓存的 1024 字节还不包括模型参数；比较内存必须注明计数对象。</p>
+<h2 id="python">Python 实验</h2>
+<p>M8，参考入口按顺序复算微型训练和缓存一致性，生成同批过拟合的真实序列。然后运行完整测试及无外部网络的站点检查。较大 CPU 配置见 <a href="34.html">第 34 章</a>，全书代码映射见 <a href="41.html">附录</a>。</p>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>examples.modern<span class="w"> </span><span class="m">40</span>
+python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-q
+python<span class="w"> </span>scripts/build.py
+python<span class="w"> </span>scripts/check_book.py<span class="w"> </span>--full
+</code></pre></div>
+
+<figure class="code-example"><figcaption>examples/modern.py · capstone</figcaption><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">capstone</span><span class="p">():</span>
+    <span class="n">shape</span><span class="p">,</span> <span class="n">initial</span><span class="p">,</span> <span class="n">final</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">generated</span> <span class="o">=</span> <span class="n">preview</span><span class="p">()</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="n">cached</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span> <span class="ow">or</span> <span class="n">final</span> <span class="o">&gt;=</span> <span class="n">initial</span> <span class="o">*</span> <span class="mf">0.05</span> <span class="ow">or</span> <span class="n">cache</span><span class="p">[</span><span class="s2">&quot;logits_max_abs&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">1e-12</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;Miniature project acceptance criteria failed&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;logits_shape&quot;</span><span class="p">:</span> <span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;loss_before&quot;</span><span class="p">:</span> <span class="n">initial</span><span class="p">,</span> <span class="s2">&quot;loss_after&quot;</span><span class="p">:</span> <span class="n">final</span><span class="p">,</span>
+            <span class="s2">&quot;generated&quot;</span><span class="p">:</span> <span class="n">generated</span><span class="p">,</span> <span class="o">**</span><span class="n">cache</span><span class="p">}</span>
+</pre></div>
+</figure>
+
+<p>参考输出包括损失 2.090428 → 0.015276、贪心「春夏秋冬春夏秋冬」，以及缓存最大差约 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1.39</mn><mo>⋅</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>17</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1.39\cdot10^{-17}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1.39</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">17</span></span></span></span></span></span></span></span></span></span></span></span>。用自己的配置时应提供自己的结果和阈值；容差应根据数值精度、参考计算和比较目的选择。</p>
+<h2 id="_5">用统一输入验收自己的实现</h2>
+<p><a href="32.html#eq-context-floor">式 (32.2)</a> 定义了末位必须读取前文的四行任务。参考运行使用词表 8、窗口 4、通道 16、4 个头、前馈宽度 48、2 个块，以及学习率 0.01 的 AdamW。这里的模型容量高于上面的 544 参数形状练习。每次固定同一个训练批更新 160 步。</p>
+<p>读者可以把 <code>examples/capstone_check.py</code> 复制到自己的目录。传入候选工厂时，脚本只需要 NumPy 和 Python 标准库。工厂接收关键字 <code>seed, vocab, context, channels, heads, hidden, layers</code>，并返回具有三个方法的对象。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>输入与返回</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>forward(ids)</code></td>
+<td>接收整数 [B,T]，返回 float64 的 [B,T,V] logits</td>
+</tr>
+<tr>
+<td><code>train_step(ids, targets)</code></td>
+<td>接收等形整数数组，返回本次更新前全部目标的平均 NLL，并更新参数</td>
+</tr>
+<tr>
+<td><code>generate(prompt, max_new_tokens, *, eos=None)</code></td>
+<td>接收 ID 列表，按 greedy 返回含原提示的完整序列</td>
+</tr>
+</tbody>
+</table>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>examples.capstone_check
+python<span class="w"> </span>-m<span class="w"> </span>examples.capstone_check<span class="w"> </span>--seed<span class="w"> </span><span class="m">17</span><span class="w"> </span>--token-seed<span class="w"> </span><span class="m">21</span>
+
+<span class="c1"># 在独立目录里使用自己的模块名和工厂名</span>
+python<span class="w"> </span>capstone_check.py<span class="w"> </span>--candidate<span class="w"> </span>my_decoder:make_model
+python<span class="w"> </span>capstone_check.py<span class="w"> </span>--candidate<span class="w"> </span>my_decoder:make_model<span class="w"> </span>--seed<span class="w"> </span><span class="m">17</span><span class="w"> </span>--token-seed<span class="w"> </span><span class="m">21</span>
+</code></pre></div>
+
+<p>入口按以下顺序核验。失败时先处理报错标出的阶段。</p>
+<ol>
+<li>检查前向输出的形状、类型、有限性，同种子构造两个实例并对照输出。</li>
+<li>分别前向整批和首行，替换未来项并独立计算各段前缀。训练前后都以绝对容差 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>10</mn><mrow><mo>−</mo><mn>10</mn></mrow></msup></mrow><annotation encoding="application/x-tex">10^{-10}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">10</span></span></span></span></span></span></span></span></span></span></span></span> 比较应当一致的 logits。</li>
+<li>从初始 logits 用 NumPy 独立计算全批 NLL，核对第一次更新的返回值，并确认更新确实改变了至少一个 logit。</li>
+<li>对比初末全批 NLL，要求末位 NLL 小于 0.2、四个答案全部正确。<code>--token-seed</code> 集中重排全部 ID，任务关系保持一致。</li>
+<li>用候选模型自己的前向独立重算四次输出，核对 <a href="31.html">第 31 章</a> 的最后一行、窗口截断、EOS 和提示保留。</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>参考运行</th>
+<th style="text-align: right;">初始全批 NLL</th>
+<th style="text-align: right;">最终全批 NLL</th>
+<th style="text-align: right;">末位 NLL</th>
+<th>末位输出</th>
+<th style="text-align: right;">前缀最大误差</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型种子 42，原 ID</td>
+<td style="text-align: right;">2.139205</td>
+<td style="text-align: right;">0.232363</td>
+<td style="text-align: right;">0.001164</td>
+<td>[4,5,4,5]</td>
+<td style="text-align: right;"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3.55</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>15</mn></mrow></msup></mrow><annotation encoding="application/x-tex">3.55\times10^{-15}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">3.55</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">15</span></span></span></span></span></span></span></span></span></span></span></span></td>
+</tr>
+<tr>
+<td>模型种子 17，ID 重排种子 21</td>
+<td style="text-align: right;">2.117518</td>
+<td style="text-align: right;">0.232530</td>
+<td style="text-align: right;">0.001627</td>
+<td>[6,3,6,3]</td>
+<td style="text-align: right;"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1.78</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>15</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1.78\times10^{-15}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1.78</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">15</span></span></span></span></span></span></span></span></span></span></span></span></td>
+</tr>
+</tbody>
+</table>
+<p>这是固定批次的验收。不同模型实现可以通过同一行为阈值，损失曲线允许不同。项目报告还要按 <a href="30.html">第 30 章</a> 测量恢复后的下一次更新，按 <a href="35.html">第 35 章</a> 对比缓存 logits，再用独立数据评估。</p>
+<figure class="code-example"><figcaption>examples/capstone_check.py · context_batch</figcaption><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">context_batch</span><span class="p">(</span><span class="n">token_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Paired prefixes ending in the same cue but requiring different answers.&quot;&quot;&quot;</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+                     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">]])</span>
+    <span class="k">if</span> <span class="n">token_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">renaming</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">token_seed</span><span class="p">)</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">[</span><span class="s2">&quot;vocab&quot;</span><span class="p">])</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">renaming</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">rows</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">rows</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mean_nll</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+    <span class="n">shifted</span> <span class="o">=</span> <span class="n">logits</span> <span class="o">-</span> <span class="n">logits</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">target_scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">shifted</span><span class="p">,</span> <span class="n">targets</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logaddexp</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">shifted</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">target_scores</span><span class="p">))</span>
+</pre></div>
+</figure>
+
+<figure class="code-example"><figcaption>examples/capstone_check.py · prefix_check</figcaption><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">check_prefix</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+    <span class="n">full</span> <span class="o">=</span> <span class="n">read_logits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">)</span>
+    <span class="n">differences</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">read_logits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">[:</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">full</span><span class="p">[:</span><span class="mi">1</span><span class="p">]))]</span>
+    <span class="k">for</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ids</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">altered</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">altered</span><span class="p">[:,</span> <span class="n">length</span><span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">altered</span><span class="p">[:,</span> <span class="n">length</span><span class="p">:]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s2">&quot;vocab&quot;</span><span class="p">]</span>
+        <span class="n">unchanged</span> <span class="o">=</span> <span class="n">full</span><span class="p">[:,</span> <span class="p">:</span><span class="n">length</span><span class="p">]</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">read_logits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">[:,</span> <span class="p">:</span><span class="n">length</span><span class="p">])</span>
+        <span class="n">with_other_suffix</span> <span class="o">=</span> <span class="n">read_logits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">altered</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">length</span><span class="p">]</span>
+        <span class="n">differences</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">prefix</span> <span class="o">-</span> <span class="n">unchanged</span><span class="p">)),</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">with_other_suffix</span> <span class="o">-</span> <span class="n">unchanged</span><span class="p">))))</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">differences</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">error</span> <span class="o">&gt;</span> <span class="n">ATOL</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">CheckFailed</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;causality or batch independence: prefix error </span><span class="si">{</span><span class="n">error</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">error</span>
+</pre></div>
+</figure>
+
+<figure class="code-example"><figcaption>examples/capstone_check.py · verify_training</figcaption><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">verify</span><span class="p">(</span><span class="n">factory</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">token_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">160</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">steps</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At least one training step is required&quot;</span><span class="p">)</span>
+    <span class="n">ids</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">context_batch</span><span class="p">(</span><span class="n">token_seed</span><span class="p">)</span>
+    <span class="n">probe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">ids</span><span class="p">,</span> <span class="n">targets</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">factory</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span> <span class="o">**</span><span class="n">CONFIG</span><span class="p">)</span>
+    <span class="n">fresh</span> <span class="o">=</span> <span class="n">factory</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span> <span class="o">**</span><span class="n">CONFIG</span><span class="p">)</span>
+    <span class="n">initial</span> <span class="o">=</span> <span class="n">read_logits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">read_logits</span><span class="p">(</span><span class="n">fresh</span><span class="p">,</span> <span class="n">ids</span><span class="p">)</span> <span class="o">-</span> <span class="n">initial</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">ATOL</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">CheckFailed</span><span class="p">(</span><span class="s2">&quot;initialization: same seed did not reproduce logits&quot;</span><span class="p">)</span>
+    <span class="n">before_prefix_error</span> <span class="o">=</span> <span class="n">check_prefix</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">probe</span><span class="p">)</span>
+    <span class="n">before</span> <span class="o">=</span> <span class="n">mean_nll</span><span class="p">(</span><span class="n">initial</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">train_step</span><span class="p">(</span><span class="n">ids</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">targets</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">before</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">ATOL</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">CheckFailed</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;train_step: returned </span><span class="si">{</span><span class="n">first</span><span class="si">}</span><span class="s2">, expected pre-update mean NLL </span><span class="si">{</span><span class="n">before</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">read_logits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">)</span> <span class="o">-</span> <span class="n">initial</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="n">ATOL</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">CheckFailed</span><span class="p">(</span><span class="s2">&quot;train_step: first update left every logit unchanged&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">train_step</span><span class="p">(</span><span class="n">ids</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">targets</span><span class="o">.</span><span class="n">copy</span><span class="p">())):</span>
+            <span class="k">raise</span> <span class="n">CheckFailed</span><span class="p">(</span><span class="s2">&quot;train_step: received nonfinite training loss&quot;</span><span class="p">)</span>
+
+    <span class="n">logits</span> <span class="o">=</span> <span class="n">read_logits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">)</span>
+    <span class="n">after</span> <span class="o">=</span> <span class="n">mean_nll</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+    <span class="n">final_rows</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">last_nll</span> <span class="o">=</span> <span class="n">mean_nll</span><span class="p">(</span><span class="n">final_rows</span><span class="p">,</span> <span class="n">targets</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">winners</span> <span class="o">=</span> <span class="n">final_rows</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">after</span> <span class="o">&gt;=</span> <span class="n">before</span> <span class="ow">or</span> <span class="n">last_nll</span> <span class="o">&gt;=</span> <span class="mf">0.2</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">winners</span><span class="p">,</span> <span class="n">targets</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="n">CheckFailed</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;context task: NLL </span><span class="si">{</span><span class="n">before</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> → </span><span class="si">{</span><span class="n">after</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;last-position NLL </span><span class="si">{</span><span class="n">last_nll</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, predicted </span><span class="si">{</span><span class="n">winners</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">, &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;expected </span><span class="si">{</span><span class="n">targets</span><span class="p">[:,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">after_prefix_error</span> <span class="o">=</span> <span class="n">check_prefix</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">probe</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">check_generation</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="n">seed</span><span class="p">,</span> <span class="s2">&quot;token_seed&quot;</span><span class="p">:</span> <span class="n">token_seed</span><span class="p">,</span> <span class="s2">&quot;steps&quot;</span><span class="p">:</span> <span class="n">steps</span><span class="p">,</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="n">CONFIG</span><span class="p">,</span>
+        <span class="s2">&quot;initial_nll&quot;</span><span class="p">:</span> <span class="n">before</span><span class="p">,</span> <span class="s2">&quot;final_nll&quot;</span><span class="p">:</span> <span class="n">after</span><span class="p">,</span> <span class="s2">&quot;last_position_nll&quot;</span><span class="p">:</span> <span class="n">last_nll</span><span class="p">,</span>
+        <span class="s2">&quot;last_token_only_nll_lower_bound&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span>
+        <span class="s2">&quot;predictions&quot;</span><span class="p">:</span> <span class="n">winners</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="s2">&quot;targets&quot;</span><span class="p">:</span> <span class="n">targets</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+        <span class="s2">&quot;max_prefix_error&quot;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">before_prefix_error</span><span class="p">,</span> <span class="n">after_prefix_error</span><span class="p">),</span>
+        <span class="s2">&quot;generation&quot;</span><span class="p">:</span> <span class="n">output</span><span class="p">,</span>
+    <span class="p">}</span>
+</pre></div>
+</figure>
+
+<figure class="code-example"><figcaption>examples/capstone_check.py · verify_greedy</figcaption><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">check_generation</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">prompt</span><span class="p">):</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">oracle</span> <span class="o">=</span> <span class="n">prompt</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">oracle</span><span class="p">[</span><span class="o">-</span><span class="n">CONFIG</span><span class="p">[</span><span class="s2">&quot;context&quot;</span><span class="p">]:]])</span>
+        <span class="n">oracle</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">read_logits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">window</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])))</span>
+
+    <span class="n">first</span> <span class="o">=</span> <span class="n">oracle</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">eos</span><span class="p">,</span> <span class="n">expected</span> <span class="ow">in</span> <span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="n">oracle</span><span class="p">),</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="p">[</span><span class="o">*</span><span class="n">prompt</span><span class="p">,</span> <span class="n">first</span><span class="p">])):</span>
+        <span class="n">argument</span> <span class="o">=</span> <span class="n">prompt</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">actual</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">argument</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">eos</span><span class="o">=</span><span class="n">eos</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">argument</span> <span class="o">!=</span> <span class="n">prompt</span> <span class="ow">or</span> <span class="n">actual</span> <span class="o">!=</span> <span class="n">expected</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">CheckFailed</span><span class="p">(</span><span class="s2">&quot;generate: expected greedy last-row IDs, context crop and EOS&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">oracle</span>
+</pre></div>
+</figure>
+
+<figure class="code-example"><figcaption>examples/capstone_check.py · reference_adapter</figcaption><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">reference_model</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="o">**</span><span class="n">config</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">src.numpy_gpt.generate</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">src.numpy_gpt.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">GPT</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">src.numpy_gpt.optim</span><span class="w"> </span><span class="kn">import</span> <span class="n">AdamW</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">src.numpy_gpt.train</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_step</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">GPT</span><span class="p">(</span><span class="n">Config</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">),</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">AdamW</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">track</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">ids</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">targets</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected shifted labels&quot;</span><span class="p">)</span>
+            <span class="n">batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">ids</span><span class="p">,</span> <span class="n">targets</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">loss</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">train_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">loss</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">max_new_tokens</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">eos</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">generate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">max_new_tokens</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">eos</span><span class="o">=</span><span class="n">eos</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Adapter</span><span class="p">()</span>
+</pre></div>
+</figure>
+
+<h2 id="_6">常见错误</h2>
+<ul>
+<li>先优化吞吐，后排查标签错位，难以分离问题来源。</li>
+<li>交付只保存最佳 loss，丢失运行配置、数据划分和错误日志。</li>
+<li>用现代组件扩展掩盖基线尚未完成的验收。</li>
+</ul>
+<h2 id="_7">练习</h2>
+<ol>
+<li><strong>基础。</strong> 写一条可运行的训练命令并列出它需要的所有输入文件。</li>
+<li><strong>推导。</strong> 从模型配置计算参数和缓存内存两个不同数字。</li>
+<li><strong>工程。</strong> 从空目录完成上述最小验收矩阵。用独立脚本跑原 ID 和重排 ID 两组，归档配置、JSON 结果和一次有意失败的日志。</li>
+<li><strong>开放探索。</strong> 选一个扩展并设计配对实验，例如 RoPE、GQA、量化或两种采样策略。</li>
+</ol>
+<details>
+<summary>参考答案</summary>
+<ol>
+<li>见 <a href="30.html">第 30 章</a>，输入包括安装环境、JSON 配置和其引用的两个数据文件。</li>
+<li>参数用 <a href="28.html#eq-parameter-count">式 (28.1)</a>，KV 用 <a href="35.html#eq-kv-bytes">式 (35.1)</a>。批与实际历史长度只进入后者。</li>
+<li>可以让模型只读取当前 ID 来触发上下文检查。归档失败阶段和对照数据，再单独记录连续训练与断点恢复、关闭与启用缓存两组实验的误差。</li>
+<li>只改变待测因素，固定数据、随机流、形状和预算，报告质量与资源两个维度。</li>
+</ol>
+</details>
+<h2 id="_8">小结与下一章</h2>
+<p>独立复现需要同时交付公式、可执行代码和尺度明确的证据。RAG（检索增强生成）、工具调用和 Agent 是应用层扩展，可以在这个预测器之外试验。<a href="41.html">附录</a> 汇总阅读、符号和复核入口。</p></div>
+<label class="progress" hidden><input type="checkbox" id="completed"> 标记为已读</label>
+<nav class="neighbors" aria-label="相邻章节"><a href="39.html"><small>上一篇</small>知识与可解释性</a><a href="41.html"><small>下一篇</small>附录：符号、公式与代码索引</a></nav>
+</article></main>
+<aside class="outline"><nav aria-label="本章目录"><p>本章目录</p><div class="toc">
+<ul>
+<li><a href="#_1">学习目标</a></li>
+<li><a href="#_2">前置知识</a></li>
+<li><a href="#gpt">本章在 GPT 中的位置</a></li>
+<li><a href="#_3">从空目录开始的交付顺序</a></li>
+<li><a href="#_4">最小验收矩阵</a></li>
+<li><a href="#python">Python 实验</a></li>
+<li><a href="#_5">用统一输入验收自己的实现</a></li>
+<li><a href="#_6">常见错误</a></li>
+<li><a href="#_7">练习</a></li>
+<li><a href="#_8">小结与下一章</a></li>
+</ul>
+</div>
+</nav></aside>
+</div>
+</body></html>

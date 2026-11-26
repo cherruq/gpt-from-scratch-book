@@ -1,0 +1,9 @@
+{"step": 0, "validation_nll": 4.826499360483813, "validation_ppl": 124.77340852101321, "parameters": 7776, "validation_tokens": 1152}
+{"step": 30, "train_batch_nll": 4.073331788485696, "gradient_norm": 0.9181402456133257}
+{"step": 30, "validation_nll": 3.9403928689122236, "validation_ppl": 51.43880603913488, "parameters": 7776, "validation_tokens": 1152}
+{"step": 60, "train_batch_nll": 2.773173105287674, "gradient_norm": 1.3240762077904147}
+{"step": 60, "validation_nll": 2.891880959370182, "validation_ppl": 18.02718613605048, "parameters": 7776, "validation_tokens": 1152}
+{"step": 90, "train_batch_nll": 2.0114725593109397, "gradient_norm": 1.8921376796584934}
+{"step": 90, "validation_nll": 2.0881497625725363, "validation_ppl": 8.069969982001608, "parameters": 7776, "validation_tokens": 1152}
+{"step": 120, "train_batch_nll": 1.6696332095410824, "gradient_norm": 1.3675897860787096}
+{"step": 120, "validation_nll": 1.530466890317098, "validation_ppl": 4.620333507769363, "parameters": 7776, "validation_tokens": 1152}

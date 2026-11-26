@@ -1,0 +1,80 @@
+{
+  "default": {
+    "seed": 42,
+    "token_seed": null,
+    "steps": 160,
+    "config": {
+      "vocab": 8,
+      "context": 4,
+      "channels": 16,
+      "heads": 4,
+      "hidden": 48,
+      "layers": 2
+    },
+    "initial_nll": 2.1392045948606326,
+    "final_nll": 0.23236266224497756,
+    "last_position_nll": 0.0011638045773130878,
+    "last_token_only_nll_lower_bound": 0.6931471805599453,
+    "predictions": [
+      4,
+      5,
+      4,
+      5
+    ],
+    "targets": [
+      4,
+      5,
+      4,
+      5
+    ],
+    "max_prefix_error": 3.552713678800501e-15,
+    "generation": [
+      0,
+      2,
+      6,
+      4,
+      4,
+      5,
+      5
+    ]
+  },
+  "renamed": {
+    "seed": 17,
+    "token_seed": 21,
+    "steps": 160,
+    "config": {
+      "vocab": 8,
+      "context": 4,
+      "channels": 16,
+      "heads": 4,
+      "hidden": 48,
+      "layers": 2
+    },
+    "initial_nll": 2.117518135972149,
+    "final_nll": 0.23252961643452308,
+    "last_position_nll": 0.0016269040319923972,
+    "last_token_only_nll_lower_bound": 0.6931471805599453,
+    "predictions": [
+      6,
+      3,
+      6,
+      3
+    ],
+    "targets": [
+      6,
+      3,
+      6,
+      3
+    ],
+    "max_prefix_error": 1.7763568394002505e-15,
+    "generation": [
+      5,
+      4,
+      7,
+      6,
+      1,
+      7,
+      3
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+numpy==2.3.5
+Markdown==3.10.2
+Pygments==2.19.2
+pytest==9.0.2
